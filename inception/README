@@ -6,6 +6,11 @@ Reference:
 
 Get Flower Data:
 $ curl -O http://download.tensorflow.org/example_images/flower_photos.tgz
+$ tar -xvf flower_photos.tgz
+
+Get Inception Mode:
+$ curl -O http://download.tensorflow.org/models/image/imagenet/inception-v3-2016-03-01.tar.gz
+$ tar xzf inception-v3-2016-03-01.tar.gz
 
 Retrain Flower Model:
 $ bazel build tensorflow/examples/image_retraining:retrain
