@@ -1,0 +1,12 @@
+Retrain the inception model.
+
+Reference:
+- https://www.tensorflow.org/tutorials/image_retraining
+- https://github.com/tensorflow/models/tree/master/inception#how-to-fine-tune-a-pre-trained-model-on-a-new-task
+
+Get Flower Data:
+$ curl -O http://download.tensorflow.org/example_images/flower_photos.tgz
+
+Retrain Flower Model:
+$ bazel build tensorflow/examples/image_retraining:retrain
+$ bazel-bin/tensorflow/examples/image_retraining/retrain --image_dir ./flower_photos
