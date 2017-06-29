@@ -1,9 +1,46 @@
 #!/usr/bin/env python3
 import os
 import os.path
-import sys
 import json
 from docopt import docopt
+
+
+DEFAULT_CONFIG_FILE = './config.json'
+
+
+class ConfigStore:
+    """Storage for configs.
+       Note that we con't consider the multi-thread problem here.
+    """
+    def __init__(self, config_file=DEFAULT_CONFIG_FILE):
+        if not os.path.exists(config_file):
+            with open(config_file, 'w') as f:
+                json.dump({}, f)
+
+        self.config_file = config_file
+
+    def get(self, key):
+        with open(self.config_file, 'r') as f:
+            configs = json.load(f)
+
+        if key not in configs:
+            return {}
+
+        return configs[key]
+
+    def get_data_dir(self, data_dir):
+        return self.get(get_key(data_dir))
+
+    def set(self, config):
+        with open(self.config_file, 'r') as f:
+            configs = json.load(f)
+
+        configs[config['name']] = config
+        with open(self.config_file, 'w') as f:
+            json.dump(configs, f)
+
+    def set_data_dir(self, data_dir):
+        self.set(gen_config(data_dir))
 
 
 def get_labels(data_dir):
@@ -12,6 +49,10 @@ def get_labels(data_dir):
 
 def get_name(data_dir):
     return os.path.basename(os.path.abspath(data_dir))
+
+
+def get_key(data_dir):
+    return get_name(data_dir)
 
 
 def gen_config(data_dir):
@@ -27,21 +68,11 @@ Usage:
 
 Options:
     --data_dir=DIR      The directory contains data. [default: ./data/20110607]
-    --config_file=FILE  The config file. [default: config.json]
 """
 if __name__ == '__main__':
     args = docopt(usage, help=True)
-    data_dir, config_file = args['--data_dir'], args['--config_file']
+    data_dir = args['--data_dir']
 
-    configs = {}
-    if os.path.exists(config_file):
-        with open(config_file, 'r') as f:
-            configs = json.load(f)
-
-    config = gen_config(data_dir)
-    if config['name'] in configs:
-        sys.exit(0)
-
-    configs[config['name']] = config
-    with open(config_file, 'w') as f:
-        json.dump(configs, f, indent=2, ensure_ascii=False)
+    config_store = ConfigStore()
+    config_store.set_data_dir(data_dir)
+    print(config_store.get_data_dir(data_dir))
