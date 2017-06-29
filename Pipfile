@@ -5,3 +5,7 @@ verify_ssl = true
 [packages]
 tensorflow = "*"
 Keras = "*"
+Pillow = "*"
+h5py = "*"
+matplotlib = "*"
+requests = "*"
