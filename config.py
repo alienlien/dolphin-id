@@ -44,7 +44,7 @@ class ConfigStore:
 
 
 def get_labels(data_dir):
-    return list(os.walk(data_dir))[0][1]
+    return sorted(list(os.walk(data_dir))[0][1])
 
 
 def get_name(data_dir):
