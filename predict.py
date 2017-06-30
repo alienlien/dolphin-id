@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import requests
 from io import BytesIO
+from pprint import pprint
 import matplotlib.pyplot as plt
 
 from keras.preprocessing import image
@@ -72,10 +73,15 @@ if __name__ == "__main__":
     if args.image is not None:
         img = Image.open(args.image)
         preds = predict(model, img, target_size)
-        plot_preds(img, preds, labels)
+
+        result = [(x, y) for (x, y) in zip(labels, preds)]
+        pprint(result)
+#         pprint('>> Prediction:\n', result)
+#         plot_preds(img, preds, labels)
 
     if args.image_url is not None:
         response = requests.get(args.image_url)
         img = Image.open(BytesIO(response.content))
         preds = predict(model, img, target_size)
-        plot_preds(img, preds, labels)
+        print('>> Prediction:', preds)
+#         plot_preds(img, preds, labels)
