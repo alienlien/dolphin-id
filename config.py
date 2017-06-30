@@ -55,10 +55,15 @@ def get_key(data_dir):
     return get_name(data_dir)
 
 
+def get_model(data_dir):
+    return './model/inception-{k}.h5'.format(k=get_key(data_dir))
+
+
 def gen_config(data_dir):
     return {
         'name': get_name(data_dir),
         'labels': get_labels(data_dir),
+        'model': get_model(data_dir),
     }
 
 
