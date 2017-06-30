@@ -13,6 +13,9 @@ from keras.applications.inception_v3 import preprocess_input
 
 from config import ConfigStore
 
+# TODO: Fix keras 2 api error, Rewrite some functions.
+# Note that the tensorflow-gpu is only enabled with python2, not 3.
+
 target_size = (229, 229)  # Fixed size for InceptionV3 architecture
 
 
