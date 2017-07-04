@@ -33,6 +33,9 @@ if __name__ == '__main__':
             ]
             out[did] += file_paths
 
+    if not os.path.exists(DATA_FOLDER_MERGE):
+        os.mkdir(DATA_FOLDER_MERGE)
+
     for did, files in out.items():
         folder = os.path.join(DATA_FOLDER_MERGE, did)
         os.mkdir(folder)
