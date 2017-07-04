@@ -56,7 +56,7 @@ def add_new_last_layer(base_model, nb_classes):
     x = Dense(FC_SIZE, activation='relu')(x)  # new FC layer, random init
     predictions = Dense(
         nb_classes, activation='softmax')(x)  # new softmax layer
-    model = Model(input=base_model.input, output=predictions)
+    model = Model(inputs=base_model.input, outputs=predictions)
     return model
 
 
@@ -129,11 +129,11 @@ def train(args):
 
     # Trains the last (added) layer only.
     model.fit_generator(
-        train_generator,
-        samples_per_epoch=nb_train_samples,
-        nb_epoch=nb_epoch,
+        generator=train_generator,
+        steps_per_epoch=nb_train_samples,
+        epochs=nb_epoch,
         validation_data=validation_generator,
-        nb_val_samples=nb_val_samples,
+        validation_steps=nb_val_samples,
         class_weight='auto')
 
     # fine-tuning
@@ -141,11 +141,11 @@ def train(args):
 
     # Fix the bottom 172 layers and adjust the top 162 layers.
     history_ft = model.fit_generator(
-        train_generator,
-        samples_per_epoch=nb_train_samples,
-        nb_epoch=nb_epoch,
+        generator=train_generator,
+        steps_per_epoch=nb_train_samples,
+        epochs=nb_epoch,
         validation_data=validation_generator,
-        nb_val_samples=nb_val_samples,
+        validation_steps=nb_val_samples,
         class_weight='auto')
 
     model.save(args.output_model_file)
