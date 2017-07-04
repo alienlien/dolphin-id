@@ -1,17 +1,19 @@
+#!/usr/bin/env python3
+# Ref: Blog: https://goo.gl/h2Nr2u
+#      Repo: https://github.com/DeepLearningSandbox/DeepLearningSandbox/tree/master/transfer_learning
 import os
 import sys
 import glob
 import argparse
 import matplotlib.pyplot as plt
 
-from keras import __version__
 from keras.applications.inception_v3 import InceptionV3, preprocess_input
 from keras.models import Model
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
 
-IM_WIDTH, IM_HEIGHT = 299, 299  #fixed size for InceptionV3
+IM_WIDTH, IM_HEIGHT = 299, 299  # Fixed size for InceptionV3
 NB_EPOCHS = 3
 BAT_SIZE = 32
 FC_SIZE = 1024
@@ -51,9 +53,9 @@ def add_new_last_layer(base_model, nb_classes):
   """
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(FC_SIZE, activation='relu')(x)  #new FC layer, random init
+    x = Dense(FC_SIZE, activation='relu')(x)  # new FC layer, random init
     predictions = Dense(
-        nb_classes, activation='softmax')(x)  #new softmax layer
+        nb_classes, activation='softmax')(x)  # new softmax layer
     model = Model(input=base_model.input, output=predictions)
     return model
 
@@ -61,7 +63,8 @@ def add_new_last_layer(base_model, nb_classes):
 def setup_to_finetune(model):
     """Freeze the bottom NB_IV3_LAYERS and retrain the remaining top layers.
 
-  note: NB_IV3_LAYERS corresponds to the top 2 inception blocks in the inceptionv3 arch
+  note: NB_IV3_LAYERS corresponds to the top 2 inception blocks
+        in the inceptionv3 arch
 
   Args:
     model: keras model
@@ -77,7 +80,9 @@ def setup_to_finetune(model):
 
 
 def train(args):
-    """Use transfer learning and fine-tuning to train a network on a new dataset"""
+    """Use transfer learning and fine-tuning to train a network
+       on a new dataset
+    """
     nb_train_samples = get_nb_files(args.train_dir)
     nb_classes = len(glob.glob(args.train_dir + "/*"))
     nb_val_samples = get_nb_files(args.val_dir)
@@ -115,19 +120,11 @@ def train(args):
     # setup model
     base_model = InceptionV3(
         weights='imagenet',
-        include_top=False)  #include_top=False excludes final FC layer
+        include_top=False)  # include_top=False excludes final FC layer
     model = add_new_last_layer(base_model, nb_classes)
 
     # transfer learning
     setup_to_transfer_learn(model, base_model)
-
-    history_tl = model.fit_generator(
-        train_generator,
-        nb_epoch=nb_epoch,
-        samples_per_epoch=nb_train_samples,
-        validation_data=validation_generator,
-        nb_val_samples=nb_val_samples,
-        class_weight='auto')
 
     # fine-tuning
     setup_to_finetune(model)
