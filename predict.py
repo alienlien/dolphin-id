@@ -17,7 +17,7 @@ from config import ConfigStore
 # Note that the tensorflow-gpu is only enabled with python2, not 3.
 
 target_size = (229, 229)  # Fixed size for InceptionV3 architecture
-
+TOP_N = 5
 
 def predict(model, img, target_size):
     """Run model prediction on image
@@ -82,4 +82,6 @@ if __name__ == "__main__":
 
     preds = predict(model, img, target_size)
     result = [(x, y) for (x, y) in zip(labels, preds)]
+    # Sort by probability
+    result = sorted(result, key=lambda item: item[1], reverse=True)[:TOP_N]
     pprint(result)
