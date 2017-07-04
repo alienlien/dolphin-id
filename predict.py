@@ -64,27 +64,22 @@ if __name__ == "__main__":
     a.add_argument('--config', help='Config key')
     args = a.parse_args()
 
-    if args.image is None and args.image_url is None:
+    if not args.image and not args.image_url:
         a.print_help()
         sys.exit(1)
+
+    if args.image:
+        img = Image.open(args.image)
+    else:
+        response = requests.get(args.image_url)
+        img = Image.open(BytesIO(response.content))
 
     cfg_store = ConfigStore()
     config = cfg_store.get(args.config)
 
     model = load_model(config['model'])
     labels = config['labels']
-    if args.image is not None:
-        img = Image.open(args.image)
-        preds = predict(model, img, target_size)
 
-        result = [(x, y) for (x, y) in zip(labels, preds)]
-        pprint(result)
-#         pprint('>> Prediction:\n', result)
-#         plot_preds(img, preds, labels)
-
-    if args.image_url is not None:
-        response = requests.get(args.image_url)
-        img = Image.open(BytesIO(response.content))
-        preds = predict(model, img, target_size)
-        print('>> Prediction:', preds)
-#         plot_preds(img, preds, labels)
+    preds = predict(model, img, target_size)
+    result = [(x, y) for (x, y) in zip(labels, preds)]
+    pprint(result)
