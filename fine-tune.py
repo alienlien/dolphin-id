@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Ref: Blog: https://goo.gl/h2Nr2u
-#      Repo: https://github.com/DeepLearningSandbox/DeepLearningSandbox/tree/master/transfer_learning
+#      Repo: https://goo.gl/gh8v8T
 import os
 import sys
 import glob
@@ -17,7 +17,7 @@ IM_WIDTH, IM_HEIGHT = 299, 299  # Fixed size for InceptionV3
 NB_EPOCHS = 3
 BAT_SIZE = 32
 FC_SIZE = 1024
-NB_IV3_LAYERS_TO_FREEZE = 172
+NB_IV3_LAYERS_TO_FREEZE = 172  # ... Magic Number? Total: 334 Layers.
 
 
 def get_nb_files(directory):
@@ -98,6 +98,7 @@ def train(args):
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
+
     test_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rotation_range=30,
@@ -126,9 +127,19 @@ def train(args):
     # transfer learning
     setup_to_transfer_learn(model, base_model)
 
+    # Trains the last (added) layer only.
+    model.fit_generator(
+        train_generator,
+        samples_per_epoch=nb_train_samples,
+        nb_epoch=nb_epoch,
+        validation_data=validation_generator,
+        nb_val_samples=nb_val_samples,
+        class_weight='auto')
+
     # fine-tuning
     setup_to_finetune(model)
 
+    # Fix the bottom 172 layers and adjust the top 162 layers.
     history_ft = model.fit_generator(
         train_generator,
         samples_per_epoch=nb_train_samples,
