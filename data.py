@@ -10,8 +10,8 @@ DATA_FOLDER_MERGE = './data/merge/'
 
 
 def get_dolphin_id(s):
-    pattern = r'Ku\ N(\d\d\d)|Ku(\d\d\d)'
-    result = re.search(pattern, s)
+    pattern = r'ku\ n(\d\d\d)|ku(\d\d\d)'
+    result = re.search(pattern, s.lower())
     if not result:
         id_for_set = os.path.basename(s)
         data_set = os.path.basename(os.path.dirname(s))
@@ -29,15 +29,16 @@ def kuroshio_id_for(did):
 if __name__ == '__main__':
     out = {}
     for root, dirs, files in os.walk(DATA_FOLDER):
+        if len(dirs) > 0 or 'poor' in root:
+            continue
+
         did = get_dolphin_id(root)
-        if did:
-            if did not in out:
-                out[did] = []
-            file_paths = [
-                os.path.join(root, f) for f in files
-                if f.lower().endswith('jpg')
-            ]
-            out[did] += file_paths
+        if did not in out:
+            out[did] = []
+        file_paths = [
+            os.path.join(root, f) for f in files if f.lower().endswith('jpg')
+        ]
+        out[did] += file_paths
 
     if not os.path.exists(DATA_FOLDER_MERGE):
         os.mkdir(DATA_FOLDER_MERGE)
