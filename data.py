@@ -5,8 +5,8 @@ import os.path
 import re
 import shutil
 
-DATA_FOLDER = './data/'
-DATA_FOLDER_MERGE = os.path.join(DATA_FOLDER, './merge/')
+DATA_FOLDER = './data/src/'
+DATA_FOLDER_MERGE = './data/merge/'
 
 
 def get_dolphin_id(s):

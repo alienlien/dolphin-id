@@ -1,6 +1,6 @@
 #!/bin/bash
 # TODO: Refine the script for repeating procedures.
-DATA_FOLDER=./data/
+DATA_FOLDER=./data/src/
 mkdir -p $DATA_FOLDER
 wget -nc -t 5 -O $DATA_FOLDER/20080713.zip https://www.dropbox.com/sh/f2l0dhlnok7ggkh/AADXpXQO0EWZHO9_ttk-zmqya/ST2008071306%20Gg/CUT_ST2008071306_06_Gg_HY_OLIC?dl=1
 wget -nc -t 5 -O $DATA_FOLDER/20110607.zip https://www.dropbox.com/sh/f2l0dhlnok7ggkh/AADYdNoizZoyf14gjl6G_6W_a/03_ST20110607_02_Gg%20%E4%BE%86\(PT\)/ST20110607_02_Gg_cut?dl=1
