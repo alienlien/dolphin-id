@@ -31,16 +31,6 @@ def get_nb_files(directory):
     return cnt
 
 
-def setup_to_transfer_learn(model, base_model):
-    """Freeze all layers and compile the model"""
-    for layer in base_model.layers:
-        layer.trainable = False
-    model.compile(
-        optimizer='rmsprop',
-        loss='categorical_crossentropy',
-        metrics=['accuracy'])
-
-
 def add_new_last_layer(base_model, nb_classes):
     """Add last layer to the convnet
 
@@ -58,6 +48,29 @@ def add_new_last_layer(base_model, nb_classes):
         nb_classes, activation='softmax')(x)  # new softmax layer
     model = Model(inputs=base_model.input, outputs=predictions)
     return model
+
+
+def setup_to_transfer_learn(model, base_model):
+    """Freeze all layers and compile the model"""
+    for layer in base_model.layers:
+        layer.trainable = False
+    model.compile(
+        optimizer='rmsprop',
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
+
+
+def setup_to_transfer_learn_by_layer(model, n):
+    """Freeze all the layers but the top/last n layers.
+    """
+    for layer in model.layers[:-n]:
+        layer.trainable = False
+    for layer in model.layers[-n:]:
+        layer.trainable = True
+    model.compile(
+        optimizer='rmsprop',
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
 
 
 def setup_to_finetune(model):
