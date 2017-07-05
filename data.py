@@ -13,11 +13,17 @@ def get_dolphin_id(s):
     pattern = r'Ku\ N(\d\d\d)|Ku(\d\d\d)'
     result = re.search(pattern, s)
     if not result:
-        return ''
+        id_for_set = os.path.basename(s)
+        data_set = os.path.basename(os.path.dirname(s))
+        return '{set}_{id}'.format(set=data_set, id=id_for_set)
 
     if result.group(1):
-        return result.group(1)
-    return result.group(2)
+        return kuroshio_id_for(result.group(1))
+    return kuroshio_id_for(result.group(2))
+
+
+def kuroshio_id_for(did):
+    return 'ku_{id}'.format(id=did)
 
 
 if __name__ == '__main__':
