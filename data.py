@@ -27,6 +27,8 @@ def kuroshio_id_for(did):
 
 
 if __name__ == '__main__':
+    # Make the dictionary that maps the dolphin id to
+    # its corresponding pictures.
     out = {}
     for root, dirs, files in os.walk(DATA_FOLDER):
         if len(dirs) > 0 or 'poor' in root:
@@ -43,6 +45,7 @@ if __name__ == '__main__':
     if not os.path.exists(DATA_FOLDER_MERGE):
         os.mkdir(DATA_FOLDER_MERGE)
 
+    # Copy the files to the corresponding folders.
     for did, files in out.items():
         folder = os.path.join(DATA_FOLDER_MERGE, did)
         os.mkdir(folder)
