@@ -2,13 +2,14 @@
 # Ref: Blog: https://goo.gl/h2Nr2u
 #      Repo: https://goo.gl/gh8v8T
 import os
+import os.path
 import sys
 import glob
 import argparse
 import matplotlib.pyplot as plt
 
 from keras.applications.inception_v3 import InceptionV3, preprocess_input
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
@@ -18,6 +19,8 @@ NB_EPOCHS = 3
 BAT_SIZE = 32
 FC_SIZE = 1024
 NB_IV3_LAYERS_TO_FREEZE = 172  # ... Magic Number? Total: 334 Layers.
+# Number of layers retrained for transfer learning
+NUM_LAYERS_RETRAIN_TRANSFER = 3
 
 
 def get_nb_files(directory):
@@ -131,14 +134,26 @@ def train(args):
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=batch_size, )
 
-    # setup model
-    base_model = InceptionV3(
-        weights='imagenet',
-        include_top=False)  # include_top=False excludes final FC layer
-    model = add_new_last_layer(base_model, nb_classes)
+    if os.path.exists(args.output_model_file):
+        model = load_model(args.output_model_file)
+    else:
+        # setup model
+        base_model = InceptionV3(
+            weights='imagenet',
+            include_top=False)  # include_top=False excludes final FC layer
+        model = add_new_last_layer(base_model, nb_classes)
 
     # transfer learning
-    setup_to_transfer_learn(model, base_model)
+    setup_to_transfer_learn_by_layer(model, NUM_LAYERS_RETRAIN_TRANSFER)
+
+#     # setup model
+#     base_model = InceptionV3(
+#         weights='imagenet',
+#         include_top=False)  # include_top=False excludes final FC layer
+#     model = add_new_last_layer(base_model, nb_classes)
+
+    # transfer learning
+#     setup_to_transfer_learn(model, base_model)
 
     # Trains the last (added) layer only.
     model.fit_generator(
