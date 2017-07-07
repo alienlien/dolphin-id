@@ -146,15 +146,6 @@ def train(args):
     # transfer learning
     setup_to_transfer_learn_by_layer(model, NUM_LAYERS_RETRAIN_TRANSFER)
 
-#     # setup model
-#     base_model = InceptionV3(
-#         weights='imagenet',
-#         include_top=False)  # include_top=False excludes final FC layer
-#     model = add_new_last_layer(base_model, nb_classes)
-
-    # transfer learning
-#     setup_to_transfer_learn(model, base_model)
-
     # Trains the last (added) layer only.
     model.fit_generator(
         generator=train_generator,
