@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import json
 import os.path
+from PIL import Image
 
-JSON_FILE = '/Users/Alien/workspace/project/private/dolphin-id/data/HL20100702_01/via_region_data HL20100702_01.json'
+JSON_FILE = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/via_region_data-HL20100702_01.json'
+IMAGES_ROOT = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/HL20100702_01'
 
 
-class Image(object):
+class ImageBoxes(object):
     """
     Attributes:
         fname: File name of the image.
@@ -14,26 +16,40 @@ class Image(object):
     """
 
     def __init__(self, fname='', data=None, width=None, height=None, boxes=[]):
-
-        if fname:
-            self.fname = fname
-
-        if data:
-            self.data = data
-
-        if width:
-            self.width = width
-
-        if height:
-            self.height = height
-
+        self.fname = fname
+        self.data = data
+        self.w = width
+        self.h = height
         self.boxes = boxes
+
+    def width(self):
+        if self.w:
+            return self.w
+
+        img = self.image()
+        self.w, self.h = img.size
+        return self.w
+
+    def height(self):
+        if self.h:
+            return self.h
+
+        img = self.image()
+        self.w, self.h = img.size
+        return self.h
+
+    def image(self):
+        if self.data:
+            return self.data
+
+        return Image.open(self.fname)
 
     def __eq__(self, other):
         return (self.fname == other.fname) and (self.boxes == other.boxes)
 
     def __repr__(self):
-        return 'Boxes: {b}'.format(b=self.boxes)
+        return 'File: {f}, Width: {w}, Height: {h}, Boxes: {b}'.format(
+            f=self.fname, w=self.width(), h=self.height(), b=self.boxes)
 
 
 class Box():
@@ -94,8 +110,17 @@ class Box():
             self.w == other.w) and (self.h == other.h)
 
     def __repr__(self):
-        return 'Bounding Box(upper left: ({x}, {y}), width: {w}, height: {h})'.format(
-            x=self.ulx, y=self.uly, w=self.w, h=self.h)
+        return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h})'.format(
+            l=self.label, x=self.ulx, y=self.uly, w=self.w, h=self.h)
+
+
+def parse_via(root, imgs):
+    """
+    Args:
+        root: Root for all the images.
+        imgs: All the image data for the via bounding box file.
+    """
+    return [parse_via_image(root, img) for img in imgs.values()]
 
 
 def parse_via_image(root, data):
@@ -136,7 +161,7 @@ def parse_via_image(root, data):
     """
     fpath = os.path.join(root, data['filename'])
     boxes = [parse_via_box(k, v) for k, v in data['regions'].items()]
-    return Image(fname=fpath, boxes=boxes)
+    return ImageBoxes(fname=fpath, boxes=boxes)
 
 
 def parse_via_box(label, item):
@@ -185,3 +210,7 @@ if __name__ == '__main__':
         out[n] += 1
 
     print('Distribution for regions:', out)
+
+    images = parse_via(IMAGES_ROOT, data)
+    for img in images:
+        print('>>', img)
