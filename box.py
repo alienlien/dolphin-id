@@ -55,7 +55,7 @@ class ImageBoxes(object):
 class Box():
     """
     Attributes:
-        label: The label for the box.
+        _label: The label for the box.
         ulx, uly: Axis (x, y) for the upper left corner.
         w: Width of the box.
         h: Height of the box.
@@ -68,7 +68,7 @@ class Box():
                  center=None,
                  width=None,
                  height=None):
-        self.label = label
+        self._label = label
 
         if upper_left and width and height:
             self.ulx = upper_left[0]
@@ -89,6 +89,9 @@ class Box():
             self.uly = upper_left[1]
             self.w = lower_right[0] - upper_left[0]
             self.h = lower_right[1] - upper_left[1]
+
+    def label(self):
+        return self._label
 
     def upper_left(self):
         return (self.ulx, self.uly)
@@ -111,7 +114,7 @@ class Box():
 
     def __repr__(self):
         return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h})'.format(
-            l=self.label, x=self.ulx, y=self.uly, w=self.w, h=self.h)
+            l=self._label, x=self.ulx, y=self.uly, w=self.w, h=self.h)
 
 
 def parse_via(root, imgs):
