@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os.path
 
 JSON_FILE = '/Users/Alien/workspace/project/private/dolphin-id/data/HL20100702_01/via_region_data HL20100702_01.json'
 
@@ -12,7 +13,7 @@ class Image(object):
         boxes: All the bounding boxes.
     """
 
-    def __init__(self, fname, data, width, height, boxes=[]):
+    def __init__(self, fname='', data=None, width=None, height=None, boxes=[]):
 
         if fname:
             self.fname = fname
@@ -28,11 +29,20 @@ class Image(object):
 
         self.boxes = boxes
 
+    def __eq__(self, other):
+        return (self.fname == other.fname) and (self.boxes == other.boxes)
+
+    def __repr__(self):
+        return 'Boxes: {b}'.format(b=self.boxes)
+
 
 class Box():
     """
     Attributes:
-
+        label: The label for the box.
+        ulx, uly: Axis (x, y) for the upper left corner.
+        w: Width of the box.
+        h: Height of the box.
     """
 
     def __init__(self,
@@ -78,6 +88,76 @@ class Box():
 
     def height(self):
         return self.h
+
+    def __eq__(self, other):
+        return (self.ulx == other.ulx) and (self.uly == other.uly) and (
+            self.w == other.w) and (self.h == other.h)
+
+    def __repr__(self):
+        return 'Bounding Box(upper left: ({x}, {y}), width: {w}, height: {h})'.format(
+            x=self.ulx, y=self.uly, w=self.w, h=self.h)
+
+
+def parse_via_image(root, data):
+    """
+    Args:
+        root: The root path for the image file.
+        data: The meta data (including the boxes) of the image.
+
+    {
+        fileref: "",
+        size: 2818332,
+        filename: HL20100702_01_Gg_990702 (25).JPG,
+        base64_img_data: "",
+        file_attributes: {},
+        regions: {
+            0: {
+                shape_attributes: {
+                    name: rect,
+                    x: 2208,
+                    y: 1150,
+                    width: 515,
+                    height: 501
+                },
+                region_attributes: {}
+            },
+            1: {
+                shape_attributes: {
+                    name: rect,
+                    x: 3643,
+                    y: 221,
+                    width: 236,
+                    height: 192
+                },
+                region_attributes: {}
+            }
+        }
+    }
+    """
+    fpath = os.path.join(root, data['filename'])
+    boxes = [parse_via_box(k, v) for k, v in data['regions'].items()]
+    return Image(fname=fpath, boxes=boxes)
+
+
+def parse_via_box(label, item):
+    """
+    {
+        shape_attributes: {
+            name: rect,
+            x: 2208,
+            y: 1150,
+            width: 515,
+            height: 501
+        },
+        region_attributes: {}
+    }
+    """
+    content = item['shape_attributes']
+    return Box(
+        label=label,
+        upper_left=(content['x'], content['y']),
+        width=content['width'],
+        height=content['height'])
 
 
 def get_name(s):
