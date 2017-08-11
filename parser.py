@@ -4,9 +4,80 @@ import json
 import os
 import os.path
 import sys
-from box import Box, parse_via
+from box import Box, ImageBoxes
 
 IMAGE_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/HL20100702_01'
+
+
+def parse_via(root, imgs):
+    """
+    Args:
+        root: Root for all the images.
+        imgs: All the image data for the via bounding box file.
+    """
+    return [parse_via_image(root, img) for img in imgs.values()]
+
+
+def parse_via_image(root, data):
+    """
+    Args:
+        root: The root path for the image file.
+        data: The meta data (including the boxes) of the image.
+
+    {
+        fileref: "",
+        size: 2818332,
+        filename: HL20100702_01_Gg_990702 (25).JPG,
+        base64_img_data: "",
+        file_attributes: {},
+        regions: {
+            0: {
+                shape_attributes: {
+                    name: rect,
+                    x: 2208,
+                    y: 1150,
+                    width: 515,
+                    height: 501
+                },
+                region_attributes: {}
+            },
+            1: {
+                shape_attributes: {
+                    name: rect,
+                    x: 3643,
+                    y: 221,
+                    width: 236,
+                    height: 192
+                },
+                region_attributes: {}
+            }
+        }
+    }
+    """
+    fpath = os.path.join(root, data['filename'])
+    boxes = [parse_via_box(k, v) for k, v in data['regions'].items()]
+    return ImageBoxes(fname=fpath, boxes=boxes)
+
+
+def parse_via_box(label, item):
+    """
+    {
+        shape_attributes: {
+            name: rect,
+            x: 2208,
+            y: 1150,
+            width: 515,
+            height: 501
+        },
+        region_attributes: {}
+    }
+    """
+    content = item['shape_attributes']
+    return Box(
+        label=label,
+        upper_left=(content['x'], content['y']),
+        width=content['width'],
+        height=content['height'])
 
 
 def gen_val(option, *args):
