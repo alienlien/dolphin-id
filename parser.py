@@ -7,6 +7,7 @@ import sys
 from box import Box, ImageBoxes
 
 IMAGE_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/HL20100702_01'
+FIN_LABEL = 0
 
 
 def parse_via(root, imgs):
@@ -55,7 +56,7 @@ def parse_via_image(root, data):
     }
     """
     fpath = os.path.join(root, data['filename'])
-    boxes = [parse_via_box(k, v) for k, v in data['regions'].items()]
+    boxes = [parse_via_box(FIN_LABEL, v) for v in data['regions'].values()]
     return ImageBoxes(fname=fpath, boxes=boxes)
 
 
@@ -106,6 +107,28 @@ def gen_square(box, option='avg'):
     """
     side = gen_val(option, box.width(), box.height())
     return Box(label=box.label(), center=box.center(), width=side, height=side)
+
+
+def gen_yolo_box(img_width, img_height, box):
+    """
+    Args:
+        img_width: The width of the image the box belongs to.
+        img_height: The height of the image the box belongs to.
+        box: The box input.
+
+    Returns:
+        label, cx, cy, width, height
+        Note that the center axis (cx, cy), width and height are normalized.
+
+    Ref:
+        https://timebutt.github.io/static/how-to-train-yolov2-to-detect-custom-objects/
+    """
+    (cx, cy) = box.center()
+    return box.label(), \
+        cx / img_width, \
+        cy / img_height, \
+        box.width() / img_width, \
+        box.height() / img_height
 
 
 if __name__ == '__main__':

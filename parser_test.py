@@ -80,3 +80,14 @@ def test_gen_square():
         width=52.5,
         height=52.5, )
     assert actual == expected
+
+
+def test_gen_yolo_box():
+    box = Box(
+        label=test_label,
+        center=(100, 201),
+        width=70,
+        height=252, )
+    actual = p.gen_yolo_box(400, 600, box)
+    expected = test_label, 0.25, 0.335, 0.175, 0.42
+    assert actual == expected
