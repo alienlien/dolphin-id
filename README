@@ -11,5 +11,12 @@ Get weight
 - https://drive.google.com/drive/folders/0B1tW_VtY7onidEwyQ2FtQVplWEU
 - tiny-yolo-voc.weights
 
+Training Dataset:
+- Dolphin images and bounding boxes.
+- https://drive.google.com/drive/folders/0B3a2oBXXOsEqbXlodDZuUV9RVVk
+
+Bounding box tool:
+- VGG VIA: http://www.robots.ox.ac.uk/~vgg/software/via/
+
 Train:
 - $ ./train.sh
