@@ -7,9 +7,12 @@ import sys
 from xml.etree import ElementTree as et
 from xml.dom.minidom import parseString
 from box import Box, ImageBoxes
+from split import copy_files_to_folder
 
-IMAGE_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/HL20100702_01'
-FIN_LABEL = 0
+SRC_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/src/test'
+IMAGE_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/train/image'
+ANNO_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/train/annotation'
+FIN_LABEL = 'fin'
 
 
 def parse_via(root, imgs):
@@ -144,16 +147,16 @@ def gen_xml_nodes(img_box):
 
     node_size = et.SubElement(root, 'size')
     width = et.SubElement(node_size, 'width')
-    width.text = img_box.width().__repr__()
+    width.text = str(img_box.width())
     height = et.SubElement(node_size, 'height')
-    height.text = img_box.height().__repr__()
+    height.text = str(img_box.height())
     depth = et.SubElement(node_size, 'depth')
     depth.text = '3'
 
     for box in img_box.boxes:
         node_obj = et.SubElement(root, 'object')
         label = et.SubElement(node_obj, 'name')
-        label.text = box.label()
+        label.text = str(box.label())
         node_box = et.SubElement(node_obj, 'bndbox')
         (ulx, uly) = box.upper_left()
         xmin = et.SubElement(node_box, 'xmin')
@@ -173,24 +176,32 @@ def xml_nodes_to_string(nodes):
 
 
 if __name__ == '__main__':
-    file_list = os.listdir(IMAGE_FOLDER)
-    box_files = [x for x in os.listdir(IMAGE_FOLDER) if x.endswith('json')]
+    file_list = os.listdir(SRC_FOLDER)
+    box_files = [x for x in os.listdir(SRC_FOLDER) if x.endswith('json')]
     if len(box_files) == 0:
-        print('No bounding box file in', IMAGE_FOLDER)
+        print('No bounding box file in', SRC_FOLDER)
         sys.exit(0)
 
     if len(box_files) > 1:
         print('Too many bounding box files:', box_files)
         sys.exit(0)
 
-    box_file = os.path.join(IMAGE_FOLDER, box_files[0])
+    box_file = os.path.join(SRC_FOLDER, box_files[0])
 
     with open(box_file, 'r') as f:
         data = json.load(f)
 
-    imgs = parse_via(IMAGE_FOLDER, data)
+    imgs = parse_via(SRC_FOLDER, data)
     for img in imgs:
         img.boxes = [gen_square(box, option='max') for box in img.boxes]
 
-    for item in imgs:
-        print('>>', item)
+    img_files = [x.fname for x in imgs]
+    copy_files_to_folder(img_files, IMAGE_FOLDER)
+
+    for img in imgs:
+        xml_str = gen_xml_string(img)
+        fname = os.path.basename(img.fname)
+        fname = fname.replace('.jpg', '.xml').replace('.JPG', '.xml')
+        fpath = os.path.join(ANNO_FOLDER, fname)
+        with open(fpath, 'w') as f:
+            f.write(xml_str)
