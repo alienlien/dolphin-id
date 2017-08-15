@@ -4,8 +4,18 @@ $ pipenv install
 $ pipenv shell -c
 
 Install darkflow
-- git clone https://github.com/thtrieu/darkflow
-- pip install -e .
+$ git clone https://github.com/thtrieu/darkflow
+$ pip install -e .
+
+Install gdrive tool
+- Download the binary from web page or use homebrew.
+$ brew install gdrive
+- Ref: https://github.com/prasmussen/gdrive
+
+Use the gdrive tool for the first time
+1) Authentication needed.
+2) Go to the following url as shown in the command line.
+3) Enter verification code as shown in the browser.
 
 Get weight 
 - https://drive.google.com/drive/folders/0B1tW_VtY7onidEwyQ2FtQVplWEU
