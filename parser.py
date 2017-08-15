@@ -9,9 +9,9 @@ from xml.dom.minidom import parseString
 from box import Box, ImageBoxes
 from split import copy_files_to_folder
 
-SRC_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/src/test'
-IMAGE_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/train/image'
-ANNO_FOLDER = '/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/train/annotation'
+SRC_FOLDER = './data/bounding-box/src/test'
+IMAGE_FOLDER = './data/bounding-box/train/image'
+ANNO_FOLDER = './data/bounding-box/train/annotation'
 FIN_LABEL = 'fin'
 
 
@@ -176,32 +176,36 @@ def xml_nodes_to_string(nodes):
 
 
 if __name__ == '__main__':
-    file_list = os.listdir(SRC_FOLDER)
-    box_files = [x for x in os.listdir(SRC_FOLDER) if x.endswith('json')]
+    src_folder = os.path.abspath(SRC_FOLDER)
+    image_folder = os.path.abspath(IMAGE_FOLDER)
+    anno_folder = os.path.abspath(ANNO_FOLDER)
+
+    file_list = os.listdir(src_folder)
+    box_files = [x for x in os.listdir(src_folder) if x.endswith('json')]
     if len(box_files) == 0:
-        print('No bounding box file in', SRC_FOLDER)
+        print('No bounding box file in', src_folder)
         sys.exit(0)
 
     if len(box_files) > 1:
         print('Too many bounding box files:', box_files)
         sys.exit(0)
 
-    box_file = os.path.join(SRC_FOLDER, box_files[0])
+    box_file = os.path.join(src_folder, box_files[0])
 
     with open(box_file, 'r') as f:
         data = json.load(f)
 
-    imgs = parse_via(SRC_FOLDER, data)
+    imgs = parse_via(src_folder, data)
     for img in imgs:
         img.boxes = [gen_square(box, option='max') for box in img.boxes]
 
     img_files = [x.fname for x in imgs]
-    copy_files_to_folder(img_files, IMAGE_FOLDER)
+    copy_files_to_folder(img_files, image_folder)
 
     for img in imgs:
         xml_str = gen_xml_string(img)
         fname = os.path.basename(img.fname)
         fname = fname.replace('.jpg', '.xml').replace('.JPG', '.xml')
-        fpath = os.path.join(ANNO_FOLDER, fname)
+        fpath = os.path.join(anno_folder, fname)
         with open(fpath, 'w') as f:
             f.write(xml_str)
