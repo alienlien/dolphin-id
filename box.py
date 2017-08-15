@@ -103,6 +103,9 @@ class Box():
     def height(self):
         return self.h
 
+    def area(self):
+        return self.w * self.h
+
     def __eq__(self, other):
         return (self.ulx == other.ulx) and (self.uly == other.uly) and (
             self.w == other.w) and (self.h == other.h)
@@ -110,3 +113,24 @@ class Box():
     def __repr__(self):
         return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h})'.format(
             l=self._label, x=self.ulx, y=self.uly, w=self.w, h=self.h)
+
+    def area_intersection(self, other):
+        (x_min_1, y_min_1), (x_max_1,
+                             y_max_1) = self.upper_left(), self.lower_right()
+        (x_min_2, y_min_2), (
+            x_max_2, y_max_2) = other.upper_left(), other.lower_right()
+        x_len = min(x_max_1, x_max_2) - max(x_min_1, x_min_2)
+        y_len = min(y_max_1, y_max_2) - max(y_min_1, y_min_2)
+
+        if x_len < 0 or y_len < 0:
+            return 0
+
+        return x_len * y_len
+
+    def area_union(self, other):
+        return self.area() + other.area() - self.area_intersection(other)
+
+    def iou(self, other):
+        """Return the intersection over union
+        """
+        return self.area_intersection(other) / self.area_union(other)
