@@ -2,7 +2,7 @@
 # This file is used to build the data set needed for the training
 # of the fin detector.
 # Source:
-# <source_folder>/img_1.jpg, img_2.jpg, ..., img_N.jpg,
+# <src_folder>/img_1.jpg, img_2.jpg, ..., img_N.jpg,
 #                /all_the_boxes(annotations).json
 #
 # Result:
@@ -18,6 +18,14 @@ from parser import VIAParser, gen_square
 SOURCE_FOLDER = './data/bounding-box/src/HL20100803_01_gg_fix/'
 TRAIN_FOLDER = './data/bounding-box/train/'
 VALIDATION_FOLDER = './data/bounding-box/validation/'
+
+
+def gen_image_folder(root):
+    return os.path.join(root, './image')
+
+
+def gen_anno_folder(root):
+    return os.path.join(root, './annotation')
 
 
 def get_json(src_folder):
@@ -43,7 +51,24 @@ def get_json(src_folder):
 
 
 if __name__ == '__main__':
-    json_file = get_json(SOURCE_FOLDER)
+    # TODO: Add config store.
+    src_folder = os.path.abspath(SOURCE_FOLDER)
+    train_folder = os.path.abspath(TRAIN_FOLDER)
+    valid_folder = os.path.abspath(VALIDATION_FOLDER)
+
+    folders = {
+        'source': src_folder,
+        'train': {
+            'image': gen_image_folder(train_folder),
+            'anno': gen_anno_folder(train_folder),
+        },
+        'validation': {
+            'image': gen_image_folder(valid_folder),
+            'anno': gen_anno_folder(valid_folder),
+        },
+    }
+
+    json_file = get_json(src_folder)
 
     if not json_file:
         sys.exit(0)
