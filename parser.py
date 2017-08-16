@@ -15,6 +15,18 @@ ANNO_FOLDER = './data/bounding-box/train/annotation'
 FIN_LABEL = 'fin'
 
 
+class VIAParser(object):
+    """It is the parser for the vgg via json file.
+    """
+
+    def __init__(self):
+        pass
+
+    def parse(self, json_file):
+        with open(json_file, 'r') as f:
+            return parse_via_json(f)
+
+
 def parse_via_json(f):
     """
     Args:
@@ -180,6 +192,7 @@ def xml_fname_from_jpg(s):
 
 
 if __name__ == '__main__':
+    parser = VIAParser()
     src_folder = os.path.abspath(SRC_FOLDER)
     image_folder = os.path.abspath(IMAGE_FOLDER)
     anno_folder = os.path.abspath(ANNO_FOLDER)
@@ -195,9 +208,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     box_file = os.path.join(src_folder, box_files[0])
-
-    with open(box_file, 'r') as f:
-        imgs = parse_via_json(f)
+    imgs = parser.parse(box_file)
 
     for k, img in imgs.items():
         imgs[k].fname = os.path.join(src_folder, img.fname)
