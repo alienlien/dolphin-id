@@ -33,7 +33,6 @@ test_image_boxes = ImageBoxes(
 
 
 def test_parse_via_image():
-    root = 'aaa/bbb/ccc'
     img_json_str = '''{
         "fileref": "",
         "size": 2785695,
@@ -64,9 +63,9 @@ def test_parse_via_image():
         }
     }'''
     data = json.loads(img_json_str)
-    actual = p.parse_via_image(root, data)
+    actual = p.parse_via_image(data)
     expected = ImageBoxes(
-        fname='aaa/bbb/ccc/HL20100702_01_Gg_990702 (26).JPG',
+        fname='HL20100702_01_Gg_990702 (26).JPG',
         boxes=[
             Box(
                 label=0,

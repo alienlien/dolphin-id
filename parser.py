@@ -15,19 +15,18 @@ ANNO_FOLDER = './data/bounding-box/train/annotation'
 FIN_LABEL = 'fin'
 
 
-def parse_via(root, imgs):
+def parse_via_json(f):
     """
     Args:
-        root: Root for all the images.
-        imgs: All the image data for the via bounding box file.
+        f: The file descriptor of the json file.
     """
-    return [parse_via_image(root, img) for img in imgs.values()]
+    data = json.load(f)
+    return {k: parse_via_image(img) for k, img in data.items()}
 
 
-def parse_via_image(root, data):
+def parse_via_image(data):
     """
     Args:
-        root: The root path for the image file.
         data: The meta data (including the boxes) of the image.
 
     {
@@ -60,9 +59,8 @@ def parse_via_image(root, data):
         }
     }
     """
-    fpath = os.path.join(root, data['filename'])
     boxes = [parse_via_box(FIN_LABEL, v) for v in data['regions'].values()]
-    return ImageBoxes(fname=fpath, boxes=boxes)
+    return ImageBoxes(fname=data['filename'], boxes=boxes)
 
 
 def parse_via_box(label, item):
@@ -199,16 +197,16 @@ if __name__ == '__main__':
     box_file = os.path.join(src_folder, box_files[0])
 
     with open(box_file, 'r') as f:
-        data = json.load(f)
+        imgs = parse_via_json(f)
 
-    imgs = parse_via(src_folder, data)
-    for img in imgs:
-        img.boxes = [gen_square(box, option='max') for box in img.boxes]
+    for k, img in imgs.items():
+        imgs[k].fname = os.path.join(src_folder, img.fname)
+        imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
 
-    img_files = [x.fname for x in imgs]
+    img_files = [x.fname for x in imgs.values()]
     copy_files_to_folder(img_files, image_folder)
 
-    for img in imgs:
+    for img in imgs.values():
         xml_str = gen_xml_string(img)
         fpath = os.path.join(anno_folder, xml_fname_from_jpg(img.fname))
         with open(fpath, 'w') as f:
