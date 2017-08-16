@@ -137,6 +137,14 @@ def test_gen_xml_string():
     assert actual == expected
 
 
+def test_xml_fname_from_jpg():
+    s = './aaa/bbb/ccc/ddd.jpg'
+    assert p.xml_fname_from_jpg(s) == 'ddd.xml'
+
+    s = '/aaa/bbb/ccc/xyz.JPG'
+    assert p.xml_fname_from_jpg(s) == 'xyz.xml'
+
+
 # def test_gen_yolo_box():
 #     box = Box(
 #         label=test_label,

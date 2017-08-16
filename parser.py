@@ -108,7 +108,7 @@ def gen_square(box, option='avg'):
 
     Args:
         box: The box input.
-        option: The option for the side lenght of the square output.
+        option: The option for the side length of the square output.
     """
     side = gen_val(option, box.width(), box.height())
     return Box(label=box.label(), center=box.center(), width=side, height=side)
@@ -175,6 +175,12 @@ def xml_nodes_to_string(nodes):
     return parseString(et.tostring(nodes)).toprettyxml(indent='    ')
 
 
+def xml_fname_from_jpg(s):
+    """It returns the corresponding xml file from jpg file with path s.
+    """
+    return os.path.basename(s).replace('.JPG', '.xml').replace('.jpg', '.xml')
+
+
 if __name__ == '__main__':
     src_folder = os.path.abspath(SRC_FOLDER)
     image_folder = os.path.abspath(IMAGE_FOLDER)
@@ -204,8 +210,6 @@ if __name__ == '__main__':
 
     for img in imgs:
         xml_str = gen_xml_string(img)
-        fname = os.path.basename(img.fname)
-        fname = fname.replace('.jpg', '.xml').replace('.JPG', '.xml')
-        fpath = os.path.join(anno_folder, fname)
+        fpath = os.path.join(anno_folder, xml_fname_from_jpg(img.fname))
         with open(fpath, 'w') as f:
             f.write(xml_str)
