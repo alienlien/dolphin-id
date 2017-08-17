@@ -13,15 +13,14 @@
 import os
 import os.path
 import shutil
-import sys
 from parser import VIAParser, gen_square, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
-SOURCE_FOLDER = './data/bounding-box/src/HL20100803_01_gg_fix/'
+SOURCE_FOLDER = './data/bounding-box/src/'
 TRAIN_FOLDER = './data/bounding-box/train/'
 VALIDATION_FOLDER = './data/bounding-box/validation/'
 VAL_RATIO = 0.2
-IS_SHUFFLE = False
+IS_SHUFFLE = True
 
 
 def gen_image_folder(root):
@@ -54,6 +53,32 @@ def get_json(src_folder):
     return os.path.join(src_folder, box_files[0])
 
 
+def parse_source_folder(parser, json_file, img_folder):
+    """It parses the via json file and returns all the images with boxes,
+    where the filename in the image objects are all of the full path
+    containing the img_folder.
+    """
+    imgs = parser.parse(json_file)
+
+    for k, img in imgs.items():
+        imgs[k].fname = os.path.join(img_folder, img.fname)
+        imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
+
+    return imgs
+
+
+def gen_image_folders(src_folder):
+    """It returns the list of all the image sub folders
+    in the source folder src_folder.
+    """
+    out = []
+    for root, dirs, files in os.walk(src_folder):
+        img_files = [x for x in files if x.lower().endswith('.jpg')]
+        if img_files and not dirs:
+            out.append(root)
+    return out
+
+
 if __name__ == '__main__':
     # TODO: Add config store.
     src_folder = os.path.abspath(SOURCE_FOLDER)
@@ -61,7 +86,6 @@ if __name__ == '__main__':
     valid_folder = os.path.abspath(VALIDATION_FOLDER)
 
     folders = {
-        'source': src_folder,
         'train': {
             'image': gen_image_folder(train_folder),
             'anno': gen_anno_folder(train_folder),
@@ -72,32 +96,22 @@ if __name__ == '__main__':
         },
     }
 
-    json_file = get_json(src_folder)
-
-    if not json_file:
-        sys.exit(0)
+    img_folders = gen_image_folders(src_folder)
 
     parser = VIAParser()
-    imgs = parser.parse(json_file)
-
-    for k, img in imgs.items():
-        imgs[k].fname = os.path.join(SOURCE_FOLDER, img.fname)
-        imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
+    imgs = {}
+    for folder in img_folders:
+        print('>> Processing Image Folder:', folder)
+        imgs.update(parse_source_folder(parser, get_json(folder), folder))
 
     result = split_files(list(imgs.keys()), VAL_RATIO, IS_SHUFFLE)
 
-    print('------- [Train Files] ------')
-    for item in sorted(result['train']):
-        print(item)
-
-    print('------- [Valid Files] ------')
-    for item in sorted(result['validation']):
-        print(item)
-
     for tp in ['train', 'validation']:
+        print('>> Begin to copy image files for:', tp)
         for k in result[tp]:
             shutil.copy(imgs[k].fname, folders[tp]['image'])
 
+        print('>> Begin to generate xml files for:', tp)
         for k in result[tp]:
             xml_fname = xml_fname_from_jpg(imgs[k].fname)
             dst = os.path.join(folders[tp]['anno'], xml_fname)
