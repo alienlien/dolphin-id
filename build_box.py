@@ -12,12 +12,16 @@
 #                    /annotation/img_v1.xml, img_v2.xml, ..., img_vm.xml
 import os
 import os.path
+import shutil
 import sys
-from parser import VIAParser, gen_square
+from parser import VIAParser, gen_square, gen_xml_string, xml_fname_from_jpg
+from split import split_files
 
 SOURCE_FOLDER = './data/bounding-box/src/HL20100803_01_gg_fix/'
 TRAIN_FOLDER = './data/bounding-box/train/'
 VALIDATION_FOLDER = './data/bounding-box/validation/'
+VAL_RATIO = 0.2
+IS_SHUFFLE = False
 
 
 def gen_image_folder(root):
@@ -79,3 +83,23 @@ if __name__ == '__main__':
     for k, img in imgs.items():
         imgs[k].fname = os.path.join(SOURCE_FOLDER, img.fname)
         imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
+
+    result = split_files(list(imgs.keys()), VAL_RATIO, IS_SHUFFLE)
+
+    print('------- [Train Files] ------')
+    for item in sorted(result['train']):
+        print(item)
+
+    print('------- [Valid Files] ------')
+    for item in sorted(result['validation']):
+        print(item)
+
+    for tp in ['train', 'validation']:
+        for k in result[tp]:
+            shutil.copy(imgs[k].fname, folders[tp]['image'])
+
+        for k in result[tp]:
+            xml_fname = xml_fname_from_jpg(imgs[k].fname)
+            dst = os.path.join(folders[tp]['anno'], xml_fname)
+            with open(dst, 'w') as f:
+                f.write(gen_xml_string(imgs[k]))
