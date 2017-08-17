@@ -62,6 +62,13 @@ def test_box_init_3():
     assert_box(b)
 
 
+def test_is_valid():
+    assert test_box.is_valid()
+
+    b = Box()
+    assert not b.is_valid()
+
+
 def test_area():
     assert test_box.area() == test_width * test_height
     assert test_box_overlap.area() == (87 - 29) * (66 - 26)

@@ -57,7 +57,7 @@ class Box():
     """
 
     def __init__(self,
-                 label,
+                 label='',
                  upper_left=None,
                  lower_right=None,
                  center=None,
@@ -84,6 +84,11 @@ class Box():
             self.uly = upper_left[1]
             self.w = lower_right[0] - upper_left[0]
             self.h = lower_right[1] - upper_left[1]
+            return
+
+        # If no valid init, returns an empty box.
+        self.label = ''
+        self.ulx = self.uly = self.w = self.h = 0
 
     def label(self):
         return self._label
@@ -105,6 +110,9 @@ class Box():
 
     def area(self):
         return self.w * self.h
+
+    def is_valid(self):
+        return self.w and self.h
 
     def __eq__(self, other):
         return (self.ulx == other.ulx) and (self.uly == other.uly) and (
