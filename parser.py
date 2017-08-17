@@ -72,6 +72,7 @@ def parse_via_image(data):
     }
     """
     boxes = [parse_via_box(FIN_LABEL, v) for v in data['regions'].values()]
+    boxes = [x for x in boxes if x.is_valid()]
     return ImageBoxes(fname=data['filename'], boxes=boxes)
 
 

@@ -81,6 +81,52 @@ def test_parse_via_image():
     assert actual == expected
 
 
+def test_parse_via_image_empty_box():
+    """Test the case that the image contains a box is not valid.
+    """
+    img_json_str = '''{
+        "fileref": "",
+        "size": 2785695,
+        "filename": "HL20100702_01_Gg_990702 (26).JPG",
+        "base64_img_data": "",
+        "file_attributes": {},
+        "regions": {
+            "0": {
+                "shape_attributes": {
+                    "name": "rect",
+                    "x": 1596,
+                    "y": 944,
+                    "width": 0,
+                    "height": 460
+                },
+                "region_attributes": {}
+            },
+            "1": {
+                "shape_attributes": {
+                    "name": "rect",
+                    "x": 3052,
+                    "y": 175,
+                    "width": 341,
+                    "height": 306
+                },
+                "region_attributes": {}
+            }
+        }
+    }'''
+    data = json.loads(img_json_str)
+    actual = p.parse_via_image(data)
+    expected = ImageBoxes(
+        fname='HL20100702_01_Gg_990702 (26).JPG',
+        boxes=[
+            Box(
+                label=1,
+                upper_left=(3052, 175),
+                width=341,
+                height=306, ),
+        ])
+    assert actual == expected
+
+
 def test_gen_val():
     assert p.gen_val('MIN', 19.0, 11.0, 33.0) == 11.0
     assert p.gen_val('Max', 19.0, 11.0, 33.0) == 33.0
