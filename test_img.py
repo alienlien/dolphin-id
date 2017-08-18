@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os.path
+from pprint import pprint
 import cv2
 from darkflow.net.build import TFNet
 
-IMAGE_FILE = os.path.abspath('./data/detector/train/image/HL20100730_02_Gg_064_IMG_8928.JPG')
+IMAGE_FILE = os.path.abspath('./data/detector/src/HL20100730_02/HL20100730_02_Gg_047_IMG_8910.JPG')
 IMAGE_FOLDER = os.path.abspath('/Users/Alien/workspace/project/private/dolphin-id/data/detector/src/HL20120708_01_gg_fix')
 
 options = {
@@ -17,8 +18,9 @@ options = {
 
 tfnet = TFNet(options)
 
-tfnet.predict()
+# result = tfnet.predict()
+# print('Result:', result)
 
-# imgcv = cv2.imread(IMAGE_FILE)
-# result = tfnet.return_predict(imgcv)
-# print(result)
+imgcv = cv2.imread(IMAGE_FILE)
+result = tfnet.return_predict(imgcv)
+pprint(result)
