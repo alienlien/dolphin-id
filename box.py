@@ -54,6 +54,7 @@ class Box():
         ulx, uly: Axis (x, y) for the upper left corner.
         w: Width of the box.
         h: Height of the box.
+        _confidence: Confidence about the box.
     """
 
     def __init__(self,
@@ -62,8 +63,11 @@ class Box():
                  lower_right=None,
                  center=None,
                  width=None,
-                 height=None):
+                 height=None,
+                 confidence=0.0):
+
         self._label = label
+        self._confidence = confidence
 
         if upper_left and width and height:
             self.ulx = upper_left[0]
@@ -107,6 +111,9 @@ class Box():
 
     def height(self):
         return self.h
+
+    def confidence(self):
+        return self._confidence
 
     def area(self):
         return self.w * self.h
