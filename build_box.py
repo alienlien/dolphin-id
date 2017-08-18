@@ -79,13 +79,8 @@ def gen_image_folders(src_folder):
     return out
 
 
-if __name__ == '__main__':
-    # TODO: Add config store.
-    src_folder = os.path.abspath(SOURCE_FOLDER)
-    train_folder = os.path.abspath(TRAIN_FOLDER)
-    valid_folder = os.path.abspath(VALIDATION_FOLDER)
-
-    folders = {
+def gen_folders(train_folder, valid_folder):
+    return {
         'train': {
             'image': gen_image_folder(train_folder),
             'anno': gen_anno_folder(train_folder),
@@ -96,7 +91,24 @@ if __name__ == '__main__':
         },
     }
 
+
+if __name__ == '__main__':
+    # TODO: Add config store.
+    src_folder = os.path.abspath(SOURCE_FOLDER)
+    train_folder = os.path.abspath(TRAIN_FOLDER)
+    valid_folder = os.path.abspath(VALIDATION_FOLDER)
+
+    for fdr in [train_folder, valid_folder]:
+        if not os.path.isdir(fdr):
+            os.mkdir(fdr)
+
+    folders = gen_folders(train_folder, valid_folder)
     img_folders = gen_image_folders(src_folder)
+
+    for fdrs in folders.values():
+        for fdr in fdrs.values():
+            if not os.path.isdir(fdr):
+                os.mkdir(fdr)
 
     parser = VIAParser()
     imgs = {}
