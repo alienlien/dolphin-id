@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# This file is used to build the data set needed for the training
+# This file is used to prepare the data set needed for the training
 # of the fin detector.
 # Source:
 # <src_folder>/img_1.jpg, img_2.jpg, ..., img_N.jpg,
