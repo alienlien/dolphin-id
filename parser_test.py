@@ -190,6 +190,27 @@ def test_xml_fname_from_jpg():
     assert p.xml_fname_from_jpg(s) == 'xyz.xml'
 
 
+def test_from_flow_result():
+    item = {
+        'label': 'fin',
+        'topleft': {
+            'x': 2578,
+            'y': 533,
+        },
+        'bottomright': {
+            'x': 2959,
+            'y': 978,
+        },
+        'confidence': 0.45233271,
+    }
+    expected = Box(
+        label='fin',
+        upper_left=(2578, 533),
+        lower_right=(2959, 978),
+        confidence=0.45233271, )
+    assert p.from_flow_result(item) == expected
+
+
 # def test_gen_yolo_box():
 #     box = Box(
 #         label=test_label,

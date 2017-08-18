@@ -192,6 +192,28 @@ def xml_fname_from_jpg(s):
     return os.path.basename(s).replace('.JPG', '.xml').replace('.jpg', '.xml')
 
 
+def from_flow_result(item):
+    """It returns the box from result generated from darkflow.
+        {
+            'label': 'fin',
+            'topleft': {
+                'x': 2578,
+                'y': 533,
+            },
+            'bottomright': {
+                'x': 2959,
+                'y': 978,
+            },
+            'confidence': 0.45233271,
+        }
+    """
+    return Box(
+        label=item['label'],
+        upper_left=(item['topleft']['x'], item['topleft']['y']),
+        lower_right=(item['bottomright']['x'], item['bottomright']['y']),
+        confidence=item['confidence'], )
+
+
 if __name__ == '__main__':
     parser = VIAParser()
     src_folder = os.path.abspath(SRC_FOLDER)
