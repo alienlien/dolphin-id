@@ -16,9 +16,9 @@ import shutil
 from parser import VIAParser, gen_square, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
-SOURCE_FOLDER = './data/bounding-box/src/'
-TRAIN_FOLDER = './data/bounding-box/train/'
-VALIDATION_FOLDER = './data/bounding-box/validation/'
+SOURCE_FOLDER = './data/detector/src/'
+TRAIN_FOLDER = './data/detector/train/'
+VALIDATION_FOLDER = './data/detector/validation/'
 VAL_RATIO = 0.2
 IS_SHUFFLE = True
 

@@ -3,8 +3,8 @@ import os.path
 import cv2
 from darkflow.net.build import TFNet
 
-IMAGE_FILE = os.path.abspath('./data/bounding-box/train/image/HL20100730_02_Gg_064_IMG_8928.JPG')
-IMAGE_FOLDER = os.path.abspath('/Users/Alien/workspace/project/private/dolphin-id/data/bounding-box/src/HL20120708_01_gg_fix')
+IMAGE_FILE = os.path.abspath('./data/detector/train/image/HL20100730_02_Gg_064_IMG_8928.JPG')
+IMAGE_FOLDER = os.path.abspath('/Users/Alien/workspace/project/private/dolphin-id/data/detector/src/HL20120708_01_gg_fix')
 
 options = {
     'model': 'config/tiny-yolo-dolphin.cfg',

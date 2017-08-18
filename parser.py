@@ -9,9 +9,9 @@ from xml.dom.minidom import parseString
 from box import Box, ImageBoxes
 from split import copy_files_to_folder
 
-SRC_FOLDER = './data/bounding-box/src/test'
-IMAGE_FOLDER = './data/bounding-box/train/image'
-ANNO_FOLDER = './data/bounding-box/train/annotation'
+SRC_FOLDER = './data/detector/src/test'
+IMAGE_FOLDER = './data/detector/train/image'
+ANNO_FOLDER = './data/detector/train/annotation'
 FIN_LABEL = 'fin'
 
 
