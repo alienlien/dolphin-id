@@ -21,6 +21,10 @@ class FinDetector(object):
 
     def detect(self, img_path):
         """It returns the list of boxes detected.
+        Note that we enlarge the result returned by darkflow to be
+        a square for the classifier directly. It can be removed
+        if we fix the anchor of the darkflow yolo object detector
+        as squares only.
 
         Args:
             img_path: The path of the image file.
