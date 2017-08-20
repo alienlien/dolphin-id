@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TODO: Rewrite it as a flask app if needed.
 from docopt import docopt
 from PIL import Image
 from detector import FinDetector
