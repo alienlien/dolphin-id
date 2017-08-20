@@ -3,6 +3,7 @@ import cv2
 import os
 import os.path
 from darkflow.net.build import TFNet
+import parser as psr
 
 DEFAULT_CONFIG = {
     'model': 'config/tiny-yolo-dolphin.cfg',
@@ -19,14 +20,25 @@ class FinDetector(object):
         self.net = TFNet(self.config)
 
     def detect(self, img_path):
-        return self.net.return_predict(cv2.imread(img_path))
+        """It returns the list of boxes detected.
+
+        Args:
+            img_path: The path of the image file.
+
+        Returns:
+            The list of boxes in the image.
+        """
+        results = self.net.return_predict(cv2.imread(img_path))
+        return [
+            psr.gen_square(psr.from_flow_result(x), 'max') for x in results
+        ]
 
     def detect_folder(self, img_folder):
-        self.config['imgdir'] = os.path.abspath(img_folder)
-        out_folder = os.path.join(self.config['imgdir'], 'out')
+        img_folder = os.path.abspath(img_folder)
+        self.config['imgdir'] = img_folder
+        out_folder = os.path.join(img_folder, 'out')
         if not os.path.isdir(out_folder):
             os.mkdir(out_folder)
 
         self.net = TFNet(self.config)
         self.net.predict()
-        pass
