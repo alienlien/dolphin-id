@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from docopt import docopt
+from PIL import Image
 from detector import FinDetector
+from classifier import Classifier
 
 usage = """
 Usage:
@@ -14,9 +16,17 @@ Options:
 
 if __name__ == '__main__':
     args = docopt(usage, help=True)
+    tp = args['--type']
     detector = FinDetector()
+    classifier = Classifier()
 
-    print('Args:', args)
+    if tp.lower() == 'single':
+        img_path = args['--image']
+        boxes = detector.detect(img_path)
+        print('>> Fin boxes:', boxes)
 
-    if args['--type'].lower() == 'single':
-        print(detector.detect(args['--image']))
+        img_src = Image.open(img_path)
+        for box in boxes:
+            (ulx, uly), (lrx, lry) = box.upper_left(), box.lower_right()
+            img_fin = img_src.crop((ulx, uly, lrx, lry))
+            print(classifier.predict(img_fin))
