@@ -21,10 +21,6 @@ class FinDetector(object):
 
     def detect(self, img_path):
         """It returns the list of boxes detected.
-        Note that we enlarge the result returned by darkflow to be
-        a square for the classifier directly. It can be removed
-        if we fix the anchor of the darkflow yolo object detector
-        as squares only.
 
         Args:
             img_path: The path of the image file.
@@ -33,9 +29,7 @@ class FinDetector(object):
             The list of boxes in the image.
         """
         results = self.net.return_predict(cv2.imread(img_path))
-        return [
-            psr.gen_square(psr.from_flow_result(x), 'max') for x in results
-        ]
+        return [psr.from_flow_result(x) for x in results]
 
     def detect_folder(self, img_folder):
         img_folder = os.path.abspath(img_folder)
