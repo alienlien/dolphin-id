@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-import cv2
+import json
 import os
 import os.path
+import cv2
 from darkflow.net.build import TFNet
+from box import ImageBoxes
 import parser as psr
 
 DEFAULT_CONFIG = {
@@ -15,6 +17,13 @@ DEFAULT_CONFIG = {
 
 
 class FinDetector(object):
+    """The fin detector.
+
+    Attributes:
+        config: The config to init the detector.
+        net: The darkflow net to detect boxes.
+    """
+
     def __init__(self, config=DEFAULT_CONFIG):
         self.config = config
         self.net = TFNet(self.config)
@@ -32,6 +41,17 @@ class FinDetector(object):
         return [psr.from_flow_result(x) for x in results]
 
     def detect_folder(self, img_folder):
+        """It returns the list of images with boxes detected.
+
+        Args:
+            img_folder: The folder containing image files to detect boxes.
+
+        Returns:
+            The list of images with boxes detected.
+        """
+        # Let the predictor returns the json output anyway.
+        self.config['json'] = True
+
         img_folder = os.path.abspath(img_folder)
         self.config['imgdir'] = img_folder
         out_folder = os.path.join(img_folder, 'out')
@@ -40,3 +60,17 @@ class FinDetector(object):
 
         self.net = TFNet(self.config)
         self.net.predict()
+
+        json_files = [
+            os.path.join(out_folder, f) for f in os.listdir(out_folder)
+            if f.endswith('.json')
+        ]
+        images = []
+        for fname in json_files:
+            with open(fname, 'r') as f:
+                data = json.load(f)
+
+            boxes = [psr.from_flow_result(x) for x in data]
+            images.append(ImageBoxes(fname=fname, boxes=boxes))
+
+        return images
