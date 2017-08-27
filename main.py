@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # TODO: Rewrite it as a flask app if needed.
+import sys
 from docopt import docopt
-from PIL import Image
 from detector import FinDetector
 from classifier import Classifier
+from box import ImageBoxes
 
 usage = """
 Usage:
@@ -18,16 +19,41 @@ Options:
 if __name__ == '__main__':
     args = docopt(usage, help=True)
     tp = args['--type']
+    img_path = args['--image']
+    img_folder = args['--imgdir']
+
+    # Check the parameters first since it cost lots of time to init...
+    if tp.lower() == 'single' and not img_path:
+        print('>> Should provide image path for type:', tp)
+        sys.exit(0)
+
+    if tp.lower() == 'multi' and not img_folder:
+        print('>> Should provide image folder for type:', tp)
+        sys.exit(0)
+
+    print('>> Initialize fin detector...')
     detector = FinDetector()
+    print('>> Initialize Risso\'s dolphin classifier...')
     classifier = Classifier()
 
     if tp.lower() == 'single':
-        img_path = args['--image']
         boxes = detector.detect(img_path)
         print('>> Fin boxes:', boxes)
+        img = ImageBoxes(fname=img_path, boxes=boxes)
 
-        img_src = Image.open(img_path)
-        for box in boxes:
-            (ulx, uly), (lrx, lry) = box.upper_left(), box.lower_right()
-            img_fin = img_src.crop((ulx, uly, lrx, lry))
-            print(classifier.predict(img_fin))
+        for img in img.box_images():
+            print(classifier.predict(img))
+
+    if tp.lower() == 'multi':
+        print('>> Ready to parse image folder:', img_folder)
+        result = detector.detect_folder(img_folder)
+        images = [
+            ImageBoxes(fname=fname, boxes=boxes)
+            for fname, boxes in result.items()
+        ]
+
+        for img in images:
+            print(img)
+            for box_img in img.box_images():
+                print(classifier.predict(box_img))
+            print('-----------------------------------')
