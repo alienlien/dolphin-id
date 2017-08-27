@@ -4,7 +4,6 @@ import os
 import os.path
 import cv2
 from darkflow.net.build import TFNet
-from box import ImageBoxes
 import parser as psr
 
 DEFAULT_CONFIG = {
@@ -47,7 +46,7 @@ class FinDetector(object):
             img_folder: The folder containing image files to detect boxes.
 
         Returns:
-            The list of images with boxes detected.
+            A map from the image file name to its boxes.
         """
         # Let the predictor returns the json output anyway.
         self.config['json'] = True
@@ -61,16 +60,15 @@ class FinDetector(object):
         self.net = TFNet(self.config)
         self.net.predict()
 
-        json_files = [
-            os.path.join(out_folder, f) for f in os.listdir(out_folder)
-            if f.endswith('.json')
-        ]
-        images = []
+        json_files = [f for f in os.listdir(out_folder) if f.endswith('.json')]
+        out = {}
         for fname in json_files:
-            with open(fname, 'r') as f:
+            with open(os.path.join(out_folder, fname), 'r') as f:
                 data = json.load(f)
 
             boxes = [psr.from_flow_result(x) for x in data]
-            images.append(ImageBoxes(fname=fname, boxes=boxes))
+            img_fname = os.path.join(img_folder, fname.replace(
+                '.json', '.jpg'))
+            out[img_fname] = boxes
 
-        return images
+        return out
