@@ -16,13 +16,13 @@ def is_overlap(box_1, box_2, iou_th):
     return box_1.iou(box_2) > iou_th
 
 
-def get_num_overlap(boxes_1, boxes_2, is_hit):
-    """It returns the number of boxes overlapped for two sets of boxes
+def get_num_hit(boxes_1, boxes_2, is_hit):
+    """It returns the number of boxes 'hit'.
     input.
 
     Args:
         boxes_1, boxes_2: The two sets of boxes input.
-        is_hit: The func to check if it is hit for boxes or not.
+        is_hit: The func to check if the boxes are 'hit' to each other or not.
     """
     out = 0
     for b1 in boxes_1:
@@ -39,18 +39,22 @@ def get_recall_precision(imgs_ans, imgs_pred, is_hit):
         imgs_ans: The images containing answers.
         imgs_pred: The images containing prediction boxes.
         is_hit: The func to check whether the boxes are hit or not.
-    """
-    imgs_map_ans = {img.fname: img for img in imgs_ans}
-    imgs_map_pred = {img.fname: img for img in imgs_pred}
 
+    Returns:
+        Recall, Precision.
+    """
+    # Numbers of relevant and detect boxes, respectively.
     num_rel = sum([len(img.boxes) for img in imgs_ans])
     num_det = sum([len(img.boxes) for img in imgs_pred])
 
+    boxes_for_fname_ans = {img.fname: img.boxes for img in imgs_ans}
+    boxes_for_fname_pred = {img.fname: img.boxes for img in imgs_pred}
+
     num_hit = 0
-    for fname, img in imgs_map_ans.items():
-        if fname not in imgs_map_pred:
+    for fname, boxes in boxes_for_fname_ans.items():
+        if fname not in boxes_for_fname_pred:
             continue
 
-        num_hit += get_num_overlap(img.boxes, imgs_map_pred[fname].boxes,
-                                   is_hit)
+        num_hit += get_num_hit(boxes, boxes_for_fname_pred[fname], is_hit)
+
     return num_hit / num_rel, num_hit / num_det
