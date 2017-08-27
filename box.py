@@ -39,12 +39,37 @@ class ImageBoxes(object):
 
         return Image.open(self.fname)
 
+    def box_images(self):
+        """It returns the images in its boxes.
+        """
+        return crop_image_for_box(self.fname, self.boxes)
+
     def __eq__(self, other):
         return (self.fname == other.fname) and (self.boxes == other.boxes)
 
     def __repr__(self):
         return 'File: {f}, Width: {w}, Height: {h}, Boxes: {b}'.format(
             f=self.fname, w=self.width(), h=self.height(), b=self.boxes)
+
+
+def crop_image_for_box(img_path, boxes):
+    """It returns the cropped images for the boxes input
+    from the original image.
+
+    Args:
+        img_path: The file path of the original image.
+        boxes: The list of boxes to crop.
+
+    Return:
+        The list of images cropped for the boxes in the form of PIL image.
+    """
+    img_src = Image.open(img_path)
+    out = []
+    for box in boxes:
+        (ulx, uly), (lrx, lry) = box.upper_left(), box.lower_right()
+        out.append(img_src.crop((ulx, uly, lrx, lry)))
+
+    return out
 
 
 class Box():
@@ -126,8 +151,13 @@ class Box():
             self.w == other.w) and (self.h == other.h)
 
     def __repr__(self):
-        return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h})'.format(
-            l=self._label, x=self.ulx, y=self.uly, w=self.w, h=self.h)
+        return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h}, confident: {c})'.format(
+            l=self._label,
+            x=self.ulx,
+            y=self.uly,
+            w=self.w,
+            h=self.h,
+            c=self._confidence)
 
     def area_intersection(self, other):
         (x_min_1, y_min_1), (x_max_1,
