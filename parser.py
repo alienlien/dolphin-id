@@ -215,6 +215,9 @@ def from_flow_result(item):
 
 
 if __name__ == '__main__':
+    """It parses the via boxes file input and generate the corresponding
+    annotation files of xml format used in VOC 2007.
+    """
     parser = VIAParser()
     src_folder = os.path.abspath(SRC_FOLDER)
     image_folder = os.path.abspath(IMAGE_FOLDER)
