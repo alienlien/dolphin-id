@@ -62,6 +62,31 @@ def test_box_init_3():
     assert_box(b)
 
 
+def test_box_init_pred_labels():
+    label_low_prob = {
+        'label': 'aaa',
+        'prob': 0.3,
+    }
+    label_high_prob = {
+        'label': 'bbb',
+        'prob': 0.6,
+    }
+    labels = [
+        label_low_prob,
+        label_high_prob,
+    ]
+    b = Box(
+        label=test_label,
+        upper_left=test_upper_left,
+        lower_right=test_lower_right,
+        pred_labels=labels, )
+    expected = [
+        label_high_prob,
+        label_low_prob,
+    ]
+    assert b.pred_labels() == expected
+
+
 def test_is_valid():
     assert test_box.is_valid()
 

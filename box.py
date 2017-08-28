@@ -80,6 +80,12 @@ class Box():
         w: Width of the box.
         h: Height of the box.
         _confidence: Confidence about the box.
+        _pred_labels: Labels predicted with their corresponding prob.
+                      [
+                        {'label': 'aaa', 'prob': 0.9},
+                        {'label': 'bbb', 'prob': 0.7},
+                        ...
+                      ]
     """
 
     def __init__(self,
@@ -89,10 +95,19 @@ class Box():
                  center=None,
                  width=None,
                  height=None,
-                 confidence=0.0):
+                 confidence=0.0,
+                 pred_labels=None):
 
         self._label = label
         self._confidence = confidence
+
+        # Init the prediction labels.
+        # Note that we sort the ranked labels according to their probabilities.
+        if pred_labels and isinstance(pred_labels, list):
+            self._pred_labels = sorted(
+                pred_labels, key=lambda x: x.get('prob', 0.0), reverse=True)
+        else:
+            self._pred_labels = []
 
         if upper_left and width and height:
             self.ulx = upper_left[0]
@@ -140,6 +155,9 @@ class Box():
     def confidence(self):
         return self._confidence
 
+    def pred_labels(self):
+        return self._pred_labels
+
     def area(self):
         return self.w * self.h
 
@@ -151,13 +169,14 @@ class Box():
             self.w == other.w) and (self.h == other.h)
 
     def __repr__(self):
-        return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h}, confident: {c})'.format(
+        return 'Bounding Box(label: {l}, upper left: ({x}, {y}), width: {w}, height: {h}, confidence: {c}, pred labels: {p})'.format(
             l=self._label,
             x=self.ulx,
             y=self.uly,
             w=self.w,
             h=self.h,
-            c=self._confidence)
+            c=self._confidence,
+            p=self._pred_labels)
 
     def area_intersection(self, other):
         (x_min_1, y_min_1), (x_max_1,
