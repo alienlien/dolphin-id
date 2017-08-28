@@ -104,8 +104,7 @@ class Box():
         # Init the prediction labels.
         # Note that we sort the ranked labels according to their probabilities.
         if pred_labels and isinstance(pred_labels, list):
-            self._pred_labels = sorted(
-                pred_labels, key=lambda x: x.get('prob', 0.0), reverse=True)
+            self._pred_labels = get_sorted_pred_labels(pred_labels)
         else:
             self._pred_labels = []
 
@@ -158,6 +157,9 @@ class Box():
     def pred_labels(self):
         return self._pred_labels
 
+    def set_pred_labels(self, pred_labels):
+        self._pred_labels = get_sorted_pred_labels(pred_labels)
+
     def area(self):
         return self.w * self.h
 
@@ -198,3 +200,9 @@ class Box():
         """Return the intersection over union
         """
         return self.area_intersection(other) / self.area_union(other)
+
+
+def get_sorted_pred_labels(pred_labels):
+    """It returns the sorted prediction label list.
+    """
+    return sorted(pred_labels, key=lambda x: x.get('prob', 0.0), reverse=True)
