@@ -4,7 +4,7 @@ import sys
 from docopt import docopt
 from detector import FinDetector
 from classifier import Classifier
-from box import ImageBoxes
+from box import ImageBoxes, crop_image_for_box
 
 usage = """
 Usage:
@@ -38,11 +38,12 @@ if __name__ == '__main__':
 
     if tp.lower() == 'single':
         boxes = detector.detect(img_path)
-        print('>> Fin boxes:', boxes)
-        img = ImageBoxes(fname=img_path, boxes=boxes)
+        # TODO: Fix the names and procedures for these funcs, such as
+        # crop_image_for_box...
+        for idx, img in enumerate(crop_image_for_box(img_path, boxes)):
+            boxes[idx].set_pred_labels(classifier.predict(img))
 
-        for img in img.box_images():
-            print(classifier.predict(img))
+        print(ImageBoxes(fname=img_path, boxes=boxes))
 
     if tp.lower() == 'multi':
         print('>> Ready to parse image folder:', img_folder)
