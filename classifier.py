@@ -56,9 +56,22 @@ class Classifier(object):
         self.model = load_model(config['model'])
 
     def predict(self, img):
+        """It returns the result predicted.
+        """
         preds = predict(self.model, img, self.config['target_size'])
         result = zip(self.config['labels'], preds)
-        # Sort by probability
-        return sorted(
+        # Sort by probability and only choose top n
+        result = sorted(
             result, key=lambda item: item[1],
             reverse=True)[:self.config['top_n']]
+        return [pred_label_for(label, prob) for (label, prob) in result]
+
+
+def pred_label_for(label, prob):
+    """It returns the prediction label for input.
+    TODO: Define a common prediction label object?
+    """
+    return {
+        'label': label,
+        'prob': prob,
+    }
