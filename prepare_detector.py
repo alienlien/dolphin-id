@@ -41,7 +41,7 @@ def get_json(src_folder):
         The json file containing all the information about bounding boxes.
     """
 
-    box_files = [x for x in os.listdir(src_folder) if x.endswith('json')]
+    box_files = [x for x in os.listdir(src_folder) if is_old_style_box_file(x)]
     if len(box_files) == 0:
         print('No bounding box file in', src_folder)
         return ''
@@ -51,6 +51,14 @@ def get_json(src_folder):
         return ''
 
     return os.path.join(src_folder, box_files[0])
+
+
+def is_old_style_box_file(json_fname):
+    """Note that we use '_2.json' to identify that
+    it is the json file containing box information and the boxes
+    are followed old style, the rectangle not the square ones.
+    """
+    return json_fname.endswith('_2.json')
 
 
 def parse_source_folder(parser, json_file, img_folder):
