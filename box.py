@@ -16,6 +16,7 @@ class ImageBoxes(object):
         self.w = width
         self.h = height
         self.boxes = boxes
+        self._box_images = []
 
     def width(self):
         if self.w:
@@ -42,7 +43,12 @@ class ImageBoxes(object):
     def box_images(self):
         """It returns the images in its boxes.
         """
-        return crop_images_for_boxes(self.fname, self.boxes)
+        if self._box_images:
+            return self._box_images
+
+        imgs = [crop_image_for_box(self.fname, box) for box in self.boxes]
+        self._box_images = imgs
+        return imgs
 
     def __eq__(self, other):
         return (self.fname == other.fname) and (self.boxes == other.boxes)
@@ -52,24 +58,19 @@ class ImageBoxes(object):
             f=self.fname, w=self.width(), h=self.height(), b=self.boxes)
 
 
-def crop_images_for_boxes(img_path, boxes):
-    """It returns the cropped images for the boxes input
-    from the original image.
+def crop_image_for_box(img_path, box):
+    """It crops the image content for the box from image img_path.
 
     Args:
-        img_path: The file path of the original image.
-        boxes: The list of boxes to crop.
+        img_path: The path of the image file.
+        box: The box to crop.
 
     Return:
-        The list of images cropped for the boxes in the form of PIL image.
+        The PIL image object cropped from image.
     """
-    img_src = Image.open(img_path)
-    out = []
-    for box in boxes:
-        (ulx, uly), (lrx, lry) = box.upper_left(), box.lower_right()
-        out.append(img_src.crop((ulx, uly, lrx, lry)))
-
-    return out
+    img = Image.open(img_path)
+    (ulx, uly), (lrx, lry) = box.upper_left(), box.lower_right()
+    return img.crop((ulx, uly, lrx, lry))
 
 
 class Box():
