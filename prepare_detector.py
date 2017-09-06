@@ -13,7 +13,7 @@
 import os
 import os.path
 import shutil
-from parser import VIAParser, gen_square, gen_xml_string, xml_fname_from_jpg
+from parser import VIAParser, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
 SOURCE_FOLDER = './data/detector/src/'
@@ -70,7 +70,6 @@ def parse_source_folder(parser, json_file, img_folder):
 
     for k, img in imgs.items():
         imgs[k].fname = os.path.join(img_folder, img.fname)
-        imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
 
     return imgs
 
