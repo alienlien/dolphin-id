@@ -3,9 +3,11 @@
 import os
 import os.path
 import sys
+from box import ImageBoxes
+from box import crop_image_for_box
 from classifier import Classifier
 from detector import FinDetector
-from parser import xml_fname_from_jpg
+from parser import xml_fname_from_jpg, from_xml
 
 IMG_FOLDER = os.path.abspath('./data/detector/test/image/')
 ANNO_FOLDER = os.path.abspath('./data/detector/test/annotation/')
@@ -31,9 +33,27 @@ if __name__ == '__main__':
             sys.exit(0)
 
         pairs.append({
-            'image': os.path.join(IMG_FOLDER, img_file),
-            'annotation': os.path.join(ANNO_FOLDER, anno_file),
+            'files': {
+                'image': os.path.join(IMG_FOLDER, img_file),
+                'annotation': os.path.join(ANNO_FOLDER, anno_file),
+            },
         })
 
-    for v in pairs:
-        print('>> Pair:', v)
+    for idx, pair in enumerate(pairs):
+        with open(pair['files']['annotation'], 'r') as f:
+            pairs[idx]['answers'] = from_xml(f)
+
+    for idx, pair in enumerate(pairs):
+        img_file = pair['files']['image']
+        # TODO: combine detect + classify as a function?
+        boxes = detector.detect(img_file)
+        box_imgs = [crop_image_for_box(img_file, box) for box in boxes]
+        for j, img in enumerate(box_imgs):
+            boxes[j].set_pred_labels(classifier.predict(img))
+        img = ImageBoxes(fname=img_file, boxes=boxes)
+
+        pairs[idx]['prediction'] = img
+
+    for pair in pairs:
+        print('>> Pair:', pair)
+        print('-----------------------------------------')
