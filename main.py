@@ -4,7 +4,7 @@ import sys
 from docopt import docopt
 from detector import FinDetector
 from classifier import Classifier
-from box import ImageBoxes
+from box import ImageBoxes, crop_image_for_box
 
 usage = """
 Usage:
@@ -38,21 +38,22 @@ if __name__ == '__main__':
 
     if tp.lower() == 'single':
         boxes = detector.detect(img_path)
+        box_imgs = [crop_image_for_box(box) for box in boxes]
+        for idx, img in enumerate(box_imgs):
+            boxes[idx].set_pred_labels(classifier.predict(img))
         img = ImageBoxes(fname=img_path, boxes=boxes)
+
         print('Image:', img)
-        for img in img.box_images():
-            print(classifier.predict(img))
 
     if tp.lower() == 'multi':
         print('>> Ready to parse image folder:', img_folder)
         result = detector.detect_folder(img_folder)
-        images = [
-            ImageBoxes(fname=fname, boxes=bxs)
-            for fname, bxs in result.items()
-        ]
-
-        for img in images:
-            print(img)
-            for box_img in img.box_images():
-                print(classifier.predict(box_img))
-            print('-----------------------------------')
+        images = []
+        for fname, boxes in result.items():
+            box_imgs = [crop_image_for_box(fname, box) for box in boxes]
+            for idx, box_img in enumerate(box_imgs):
+                boxes[idx].set_pred_labels(classifier.predict(box_img))
+            img = ImageBoxes(fname=fname, boxes=boxes)
+            print('>> Image:', img)
+            print('-----------------------------------------')
+            images.append(img)
