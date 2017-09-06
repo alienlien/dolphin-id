@@ -42,7 +42,7 @@ class ImageBoxes(object):
     def box_images(self):
         """It returns the images in its boxes.
         """
-        return crop_image_for_box(self.fname, self.boxes)
+        return crop_images_for_boxes(self.fname, self.boxes)
 
     def __eq__(self, other):
         return (self.fname == other.fname) and (self.boxes == other.boxes)
@@ -52,7 +52,7 @@ class ImageBoxes(object):
             f=self.fname, w=self.width(), h=self.height(), b=self.boxes)
 
 
-def crop_image_for_box(img_path, boxes):
+def crop_images_for_boxes(img_path, boxes):
     """It returns the cropped images for the boxes input
     from the original image.
 
