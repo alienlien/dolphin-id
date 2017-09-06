@@ -186,6 +186,36 @@ def xml_nodes_to_string(nodes):
     return parseString(et.tostring(nodes)).toprettyxml(indent='    ')
 
 
+def from_xml(f):
+    """It parses the xml file descriptor and returns an image object.
+
+    Args:
+        f: The file object for the xml file.
+
+    Return:
+        An image object that containing all the info in the xml.
+    """
+    root = et.parse(f).getroot()
+
+    fname = root.find('filename').text
+
+    size = root.find('size')
+    width = size.find('width')
+    height = size.find('height')
+
+    boxes = []
+    for box in root.findall('object'):
+        label = box.find('name').text
+        bndbox = box.find('bndbox')
+        upper_left = (float(bndbox.find('xmin').text),
+                      float(bndbox.find('ymin').text))
+        lower_right = (float(bndbox.find('xmax').text),
+                       float(bndbox.find('ymax').text))
+        boxes.append(
+            Box(label=label, upper_left=upper_left, lower_right=lower_right))
+    return ImageBoxes(fname=fname, width=width, height=height, boxes=boxes)
+
+
 def xml_fname_from_jpg(s):
     """It returns the corresponding xml file from jpg file with path s.
     """

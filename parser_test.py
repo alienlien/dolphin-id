@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import io
 import json
 import parser as p
 # from parser import squarize, gen_val
@@ -30,6 +31,34 @@ test_image_boxes = ImageBoxes(
                 width=test_width_2,
                 height=test_height_2, )
     ])
+test_xml_string = """<?xml version="1.0" ?>
+<annotation>
+    <filename>aaabbb.jpg</filename>
+    <size>
+        <width>1024</width>
+        <height>768</height>
+        <depth>3</depth>
+    </size>
+    <object>
+        <name>test_label</name>
+        <bndbox>
+            <xmin>87.5</xmin>
+            <ymin>15.0</ymin>
+            <xmax>168.5</xmax>
+            <ymax>39.0</ymax>
+        </bndbox>
+    </object>
+    <object>
+        <name>test_222</name>
+        <bndbox>
+            <xmin>266.5</xmin>
+            <ymin>116.0</ymin>
+            <xmax>311.5</xmax>
+            <ymax>158.0</ymax>
+        </bndbox>
+    </object>
+</annotation>
+"""
 
 
 def test_parse_via_image():
@@ -151,35 +180,12 @@ def test_gen_square():
 
 def test_gen_xml_string():
     actual = p.gen_xml_string(test_image_boxes)
-    expected = """<?xml version="1.0" ?>
-<annotation>
-    <filename>aaabbb.jpg</filename>
-    <size>
-        <width>1024</width>
-        <height>768</height>
-        <depth>3</depth>
-    </size>
-    <object>
-        <name>test_label</name>
-        <bndbox>
-            <xmin>87.5</xmin>
-            <ymin>15.0</ymin>
-            <xmax>168.5</xmax>
-            <ymax>39.0</ymax>
-        </bndbox>
-    </object>
-    <object>
-        <name>test_222</name>
-        <bndbox>
-            <xmin>266.5</xmin>
-            <ymin>116.0</ymin>
-            <xmax>311.5</xmax>
-            <ymax>158.0</ymax>
-        </bndbox>
-    </object>
-</annotation>
-"""
-    assert actual == expected
+    assert actual == test_xml_string
+
+
+def test_from_xml():
+    actual = p.from_xml(io.StringIO(test_xml_string))
+    assert actual == test_image_boxes
 
 
 def test_xml_fname_from_jpg():
