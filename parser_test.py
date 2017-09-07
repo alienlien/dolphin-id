@@ -156,6 +156,107 @@ def test_parse_via_image_empty_box():
     assert actual == expected
 
 
+def test_parse_via_box_ku_id():
+    """It test the case that the box has both group and ku IDs.
+    """
+    test_json_box = '''{
+        "shape_attributes": {
+            "name": "rect",
+            "x": 2208,
+            "y": 1150,
+            "width": 515,
+            "height": 501
+        },
+        "region_attributes": {
+            "GROUP ID": "01",
+            "KU ID": "085"
+        }
+    }'''
+    item = json.loads(test_json_box)
+    actual = p.parse_via_box(item)
+    expected = Box(
+        label='ku_085',
+        upper_left=(2208, 1150),
+        width=515,
+        height=501, )
+    assert actual == expected
+
+
+def test_parse_via_box_group_id():
+    """It test the case that the box has group ID only.
+    """
+    test_json_box = '''{
+        "shape_attributes": {
+            "name": "rect",
+            "x": 2208,
+            "y": 1150,
+            "width": 515,
+            "height": 501
+        },
+        "region_attributes": {
+            "GROUP ID": "07",
+            "KU ID": ""
+        }
+    }'''
+    item = json.loads(test_json_box)
+    prefix = 'aabbcc'
+    actual = p.parse_via_box(item, prefix)
+    expected = Box(
+        label='aabbcc_07',
+        upper_left=(2208, 1150),
+        width=515,
+        height=501, )
+    assert actual == expected
+
+
+def test_parse_via_box_default_id():
+    """It test the case that the box hos no info about group and ku ids.
+    """
+    test_json_box = '''{
+        "shape_attributes": {
+            "name": "rect",
+            "x": 2208,
+            "y": 1150,
+            "width": 515,
+            "height": 501
+        },
+        "region_attributes": {}
+    }'''
+    item = json.loads(test_json_box)
+    prefix = 'aabbcc'
+    actual = p.parse_via_box(item, prefix)
+    expected = Box(
+        label='fin',
+        upper_left=(2208, 1150),
+        width=515,
+        height=501, )
+    assert actual == expected
+
+
+def test_label_for():
+    ku_id = '00042'
+    assert p.label_for(ku_id, '', '') == 'ku_042'
+
+    group_id = '0007'
+    prefix = 'aabbcc'
+    assert p.label_for('', group_id, prefix) == 'aabbcc_07'
+
+    assert p.label_for('', '', '') == p.FIN_LABEL
+
+
+def test_ku_id_for():
+    kid = '42'
+    actual = p.ku_id_for(kid)
+    assert actual == 'ku_042'
+
+
+def test_group_id_for():
+    prefix = 'aabbcc'
+    gid = '007'
+    actual = p.group_id_for(prefix, gid)
+    assert actual == 'aabbcc_07'
+
+
 def test_gen_val():
     assert p.gen_val('MIN', 19.0, 11.0, 33.0) == 11.0
     assert p.gen_val('Max', 19.0, 11.0, 33.0) == 33.0
