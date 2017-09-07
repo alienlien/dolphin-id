@@ -218,6 +218,34 @@ def gen_xml_string(img_box):
 
 
 def gen_xml_nodes(img_box):
+    """<?xml version="1.0" ?>
+<annotation>
+    <filename>aaabbb.jpg</filename>
+    <size>
+        <width>1024</width>
+        <height>768</height>
+        <depth>3</depth>
+    </size>
+    <object>
+        <name>test_label</name>
+        <bndbox>
+            <xmin>87.5</xmin>
+            <ymin>15.0</ymin>
+            <xmax>168.5</xmax>
+            <ymax>39.0</ymax>
+        </bndbox>
+    </object>
+    <object>
+        <name>test_222</name>
+        <bndbox>
+            <xmin>266.5</xmin>
+            <ymin>116.0</ymin>
+            <xmax>311.5</xmax>
+            <ymax>158.0</ymax>
+        </bndbox>
+    </object>
+</annotation>
+    """
     root = et.Element('annotation')
     node_fname = et.SubElement(root, 'filename')
     node_fname.text = img_box.fname
