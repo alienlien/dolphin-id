@@ -214,11 +214,20 @@ def gen_square(box, option='avg'):
 
 
 def gen_xml_string(img_box):
+    """It generates the corresbonding xml string for the image input
+    It follows the XML format of VOC 2007 such that the classifier can
+    read the box data.
+
+    # FIXME. I CANNOT go to the web for voc. FXXK.
+    Ref: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/htmldoc/index.html
+         8.3 Submission of Results
+    """
     return xml_nodes_to_string(gen_xml_nodes(img_box))
 
 
 def gen_xml_nodes(img_box):
-    """<?xml version="1.0" ?>
+    """
+    <?xml version="1.0" ?>
 <annotation>
     <filename>aaabbb.jpg</filename>
     <size>
