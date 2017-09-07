@@ -3,6 +3,7 @@
 import json
 import os
 import os.path
+import re
 import sys
 from xml.etree import ElementTree as et
 from xml.dom.minidom import parseString
@@ -13,6 +14,10 @@ SRC_FOLDER = './data/detector/src/test'
 IMAGE_FOLDER = './data/detector/train/image'
 ANNO_FOLDER = './data/detector/train/annotation'
 FIN_LABEL = 'fin'
+GROUP_ID_KEY_1 = 'GROUP ID'
+GROUP_ID_KEY_2 = 'GROUP_ID'
+KU_ID_KEY_1 = 'KU ID'
+KU_ID_KEY_2 = 'KU_ID'
 
 
 class VIAParser(object):
@@ -66,17 +71,41 @@ def parse_via_image(data):
                     width: 236,
                     height: 192
                 },
-                region_attributes: {}
+                "region_attributes": {
+                    "GROUP ID": "01",
+                    "KU ID": "085"
+                }
             }
         }
     }
     """
-    boxes = [parse_via_box(FIN_LABEL, v) for v in data['regions'].values()]
+    prefix = prefix_for_filename(data['filename'])
+    boxes = [parse_via_box(v, prefix) for v in data['regions'].values()]
     boxes = [x for x in boxes if x.is_valid()]
     return ImageBoxes(fname=data['filename'], boxes=boxes)
 
 
-def parse_via_box(label, item):
+def prefix_for_filename(fname):
+    """It returns the prefix for the group id from file name input.
+    Note that we now use the file name directly rather than the folder.
+    One day we might need to fetch the 'Date' information (i.e., prefix)
+    from folder import directly.
+
+    Args:
+        fname: File name of the image.
+
+    Return:
+        The prefix used for the group id of that file.
+
+    Example:
+        Input : HL20100702_01_Gg_990702 (25).JPG
+        Return: 20100702
+    """
+    group_name = fname.split('_')[0]
+    return re.findall('\d+', group_name)[0]
+
+
+def parse_via_box(item, prefix=''):
     """
     {
         shape_attributes: {
@@ -86,15 +115,52 @@ def parse_via_box(label, item):
             width: 515,
             height: 501
         },
-        region_attributes: {}
+        "region_attributes": {
+            "GROUP ID": "01",
+            "KU ID": "085"
+        }
     }
     """
     content = item['shape_attributes']
+    ids = item['region_attributes']
+    label = FIN_LABEL
+    if ids:
+        group_id = ids.get(GROUP_ID_KEY_1, '') or ids.get(GROUP_ID_KEY_2, '')
+        ku_id = ids.get(KU_ID_KEY_1, '') or ids.get(KU_ID_KEY_2, '')
+        label = label_for(ku_id, group_id, prefix)
     return Box(
         label=label,
         upper_left=(content['x'], content['y']),
         width=content['width'],
         height=content['height'])
+
+
+def label_for(ku_id, group_id, prefix_gid):
+    if ku_id:
+        return ku_id_for(ku_id)
+    if group_id:
+        return group_id_for(prefix_gid, group_id)
+    # Default value if there are no ku id and group id.
+    return FIN_LABEL
+
+
+def ku_id_for(kid):
+    """It returns the ku ID for id input.
+
+    Args:
+        kid: ku id in the format of number string only (e.g., '00034')
+    """
+    return 'ku_{0:03d}'.format(int(kid))
+
+
+def group_id_for(prefix, gid):
+    """It returns the group id for the prefix and id input.
+
+    Args:
+        prefix: The prefix for the group id output.
+        gid: The group id input (e.g., '007')
+    """
+    return '{0}_{1:02d}'.format(prefix, int(gid))
 
 
 def gen_val(option, *args):
