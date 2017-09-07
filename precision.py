@@ -32,11 +32,11 @@ def get_num_hit(boxes_1, boxes_2, is_hit):
     return out
 
 
-def get_recall_precision(imgs_ans, imgs_pred, is_hit):
+def get_recall_precision(imgs_truth, imgs_pred, is_hit):
     """It returns the recall and precision for the images input.
 
     Args:
-        imgs_ans: The images containing answers.
+        imgs_truth: The images containing ground truth.
         imgs_pred: The images containing prediction boxes.
         is_hit: The func to check whether the boxes are hit or not.
 
@@ -44,14 +44,14 @@ def get_recall_precision(imgs_ans, imgs_pred, is_hit):
         Recall, Precision.
     """
     # Numbers of relevant and detect boxes, respectively.
-    num_rel = sum([len(img.boxes) for img in imgs_ans])
+    num_rel = sum([len(img.boxes) for img in imgs_truth])
     num_det = sum([len(img.boxes) for img in imgs_pred])
 
-    boxes_for_fname_ans = {img.fname: img.boxes for img in imgs_ans}
+    boxes_for_fname_truth = {img.fname: img.boxes for img in imgs_truth}
     boxes_for_fname_pred = {img.fname: img.boxes for img in imgs_pred}
 
     num_hit = 0
-    for fname, boxes in boxes_for_fname_ans.items():
+    for fname, boxes in boxes_for_fname_truth.items():
         if fname not in boxes_for_fname_pred:
             continue
 
