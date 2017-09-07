@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# It is used to arrange data.
+# It is used to arrange data for classifier.
 import os
 import os.path
 import re
