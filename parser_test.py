@@ -184,6 +184,7 @@ def test_parse_via_box_ku_id():
 
 def test_parse_via_box_group_id():
     """It test the case that the box has group ID only.
+    Ref: HL20110818_02_Gg_058_IMG_9595.JPG and its corresponding xml.
     """
     test_json_box = '''{
         "shape_attributes": {
@@ -194,8 +195,7 @@ def test_parse_via_box_group_id():
             "height": 501
         },
         "region_attributes": {
-            "GROUP ID": "07",
-            "KU ID": ""
+            "GROUP ID": "07"
         }
     }'''
     item = json.loads(test_json_box)
