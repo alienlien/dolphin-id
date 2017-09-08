@@ -10,8 +10,8 @@ from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import is_overlap, get_num_hit_rank
 
-IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/test_id/train/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/test_id/train/annotation/')
 IOU_THRESHOLD = 0.5
 
 if __name__ == '__main__':
@@ -74,17 +74,21 @@ if __name__ == '__main__':
     print('>> Number of boxes predicted [Overlapped with ground truth]:',
           sum([len(x['prediction'].boxes) for x in data]))
 
-    num_rel, num_det, num_hit = 0, 0, 0
-    for datum in data:
-        boxes_truth = datum['truth'].boxes
-        boxes_pred = datum['prediction'].boxes
+    num_rel = sum([len(x['truth'].boxes) for x in data])
+    num_det, num_hit = 0, 0
+    # TODO: Add config for the max. of rank.
+    for rank in range(0, 5):
+        for datum in data:
+            boxes_truth = datum['truth'].boxes
+            boxes_pred = datum['prediction'].boxes
 
-        num_rel += len(boxes_truth)
-        num_det += len(boxes_pred)
-        # Check rank 0 first.
-        num_hit += get_num_hit_rank(boxes_truth, boxes_pred, 0)
+            num_det += len(boxes_pred)
+            # Check rank 0 first.
+            num_hit += get_num_hit_rank(boxes_truth, boxes_pred, rank)
 
-    print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
-        r=num_rel, d=num_det, h=num_hit))
-    print('>> Precision = {p}, Recall = {r}'.format(
-        p=num_hit / num_det, r=num_hit / num_rel))
+        print('>> To Rank', rank)
+        print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
+            r=num_rel, d=num_det, h=num_hit))
+        print('>> Precision = {p}, Recall = {r}'.format(
+            p=num_hit / num_det, r=num_hit / num_rel))
+        print('---------------------------------------------------------')
