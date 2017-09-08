@@ -1,7 +1,7 @@
 #!/usr/env/python3
 # This file calculate the prediction result.
-
-IOU_THRESHOLD = 0.5
+# TODO: Unify all the names:
+#       (Ground Truth, Prediction) v.s. (Relevant, Detection)
 
 
 def is_overlap(box_1, box_2, iou_th):
@@ -13,21 +13,21 @@ def is_overlap(box_1, box_2, iou_th):
         box_1, box_2: The boxes input.
         iou_th: The threshold for the iou.
     """
+    print('>> IOU:', box_1.iou(box_2))
     return box_1.iou(box_2) > iou_th
 
 
-def get_num_hit(boxes_1, boxes_2, is_hit):
-    """It returns the number of boxes 'hit'.
-    input.
+def get_num_hit(boxes_truth, boxes_pred, is_hit):
+    """It returns the number of boxes 'hit' input.
 
     Args:
         boxes_1, boxes_2: The two sets of boxes input.
         is_hit: The func to check if the boxes are 'hit' to each other or not.
     """
     out = 0
-    for b1 in boxes_1:
-        for b2 in boxes_2:
-            if is_hit(b1, b2):
+    for tbox in boxes_truth:
+        for pbox in boxes_pred:
+            if is_hit(tbox, pbox):
                 out += 1
     return out
 
@@ -58,3 +58,28 @@ def get_recall_precision(imgs_truth, imgs_pred, is_hit):
         num_hit += get_num_hit(boxes, boxes_for_fname_pred[fname], is_hit)
 
     return num_hit / num_rel, num_hit / num_det
+
+
+def is_label_match_rank(box_truth, box_pred, rank):
+    if rank >= len(box_pred.pred_labels()):
+        return False
+
+    return box_truth.label() == box_pred.pred_labels()[rank]['label']
+
+
+def get_num_hit_rank(boxes_truth, boxes_pred, rank):
+    """It returns the number of hit of boxes on rank input.
+
+    Args:
+        boxes_truth: Ground truth boxes.
+        boxes_pred: Boxes of prediction.
+        rank: The rank to check. It begins from 0.
+
+    Returns:
+        It returns the number of boxes hits on the rank input.
+    """
+
+    def is_hit(box_truth, box_pred):
+        return is_label_match_rank(box_truth, box_pred, rank)
+
+    return get_num_hit(boxes_truth, boxes_pred, is_hit)
