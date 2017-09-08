@@ -16,9 +16,9 @@ import shutil
 from parser import VIAParser, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
-SOURCE_FOLDER = './data/detector/src/'
-TRAIN_FOLDER = './data/detector/train/'
-VALIDATION_FOLDER = './data/detector/validation/'
+SOURCE_FOLDER = './data/detector/src/HL20100803_01_gg_fix'
+TRAIN_FOLDER = './data/detector/test_id/train/'
+VALIDATION_FOLDER = './data/detector/test_id/validation/'
 VAL_RATIO = 0.2
 IS_SHUFFLE = True
 
@@ -31,7 +31,7 @@ def gen_anno_folder(root):
     return os.path.join(root, './annotation')
 
 
-def get_json(src_folder):
+def get_json(src_folder, tp='fin'):
     """It returns the json file from source folder.
 
     Args:
@@ -40,8 +40,13 @@ def get_json(src_folder):
     Returns:
         The json file containing all the information about bounding boxes.
     """
+    if tp == 'id':
+        is_box_file = is_id_box_file
+    else:
+        is_box_file = is_old_style_box_file
 
-    box_files = [x for x in os.listdir(src_folder) if is_old_style_box_file(x)]
+    box_files = [x for x in os.listdir(src_folder) if is_box_file(x)]
+    print('>> Candidates of box files:', box_files)
     if len(box_files) == 0:
         print('No bounding box file in', src_folder)
         return ''
@@ -59,6 +64,14 @@ def is_old_style_box_file(json_fname):
     are followed old style, the rectangle not the square ones.
     """
     return json_fname.endswith('_2.json')
+
+
+def is_id_box_file(json_fname):
+    """It checks whether the json file input contains labels
+    (i.e., group/ku id) or not.
+    """
+    # TODO: Determine the naming rules for (via) box files.
+    return json_fname.endswith('_ID.json') or json_fname.endswith('_ID2.json')
 
 
 def parse_source_folder(parser, json_file, img_folder):
@@ -121,7 +134,8 @@ if __name__ == '__main__':
     imgs = {}
     for folder in img_folders:
         print('>> Processing Image Folder:', folder)
-        imgs.update(parse_source_folder(parser, get_json(folder), folder))
+        imgs.update(
+            parse_source_folder(parser, get_json(folder, 'id'), folder))
 
     result = split_files(list(imgs.keys()), VAL_RATIO, IS_SHUFFLE)
 
