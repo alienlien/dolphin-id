@@ -10,8 +10,8 @@ from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import is_overlap, get_num_hit_rank
 
-IMG_FOLDER = os.path.abspath('./data/detector/test/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
 IOU_THRESHOLD = 0.5
 
 if __name__ == '__main__':
@@ -88,7 +88,3 @@ if __name__ == '__main__':
         r=num_rel, d=num_det, h=num_hit))
     print('>> Precision = {p}, Recall = {r}'.format(
         p=num_hit / num_det, r=num_hit / num_rel))
-
-#     imgs_pred = [x['prediction'] for x in data]
-#     imgs_truth = [x['truth'] for x in data]
-#     print(get_recall_precision(imgs_truth, imgs_pred))
