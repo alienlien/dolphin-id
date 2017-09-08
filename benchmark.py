@@ -8,6 +8,7 @@ from box import crop_image_for_box
 from classifier import Classifier
 from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
+from precision import is_overlap, get_num_hit_rank
 
 IMG_FOLDER = os.path.abspath('./data/detector/test/image/')
 ANNO_FOLDER = os.path.abspath('./data/detector/test/annotation/')
@@ -24,27 +25,27 @@ if __name__ == '__main__':
         print('No match for image and annotation files.')
         sys.exit(0)
 
-    # Pairs is the list of all the images and their corresponding annotations.
-    pairs = []
+    # data is the list of all the images and their corresponding annotations.
+    data = []
     for img_file in img_files:
         anno_file = xml_fname_from_jpg(img_file)
         if anno_file not in anno_files:
             print('Image {f} is has no annotation:'.format(f=img_file))
             sys.exit(0)
 
-        pairs.append({
+        data.append({
             'files': {
                 'image': os.path.join(IMG_FOLDER, img_file),
                 'annotation': os.path.join(ANNO_FOLDER, anno_file),
             },
         })
 
-    for idx, pair in enumerate(pairs):
-        with open(pair['files']['annotation'], 'r') as f:
-            pairs[idx]['answers'] = from_xml(f)
+    for idx, datum in enumerate(data):
+        with open(datum['files']['annotation'], 'r') as f:
+            data[idx]['truth'] = from_xml(f)
 
-    for idx, pair in enumerate(pairs):
-        img_file = pair['files']['image']
+    for idx, datum in enumerate(data):
+        img_file = datum['files']['image']
         # TODO: combine detect + classify as a function?
         boxes = detector.detect(img_file)
         box_imgs = [crop_image_for_box(img_file, box) for box in boxes]
@@ -52,8 +53,42 @@ if __name__ == '__main__':
             boxes[j].set_pred_labels(classifier.predict(img))
         img = ImageBoxes(fname=img_file, boxes=boxes)
 
-        pairs[idx]['prediction'] = img
+        data[idx]['prediction'] = img
 
-    for pair in pairs:
-        print('>> Pair:', pair)
-        print('-----------------------------------------')
+    print('>> Number of boxes predicted:',
+          sum([len(x['prediction'].boxes) for x in data]))
+
+    # Keep only the boxes in prediction if it overlaps some box in ground truth
+    for idx, datum in enumerate(data):
+        boxes_truth = datum['truth'].boxes
+        boxes_pred = datum['prediction'].boxes
+
+        boxes_overlap = []
+        for pbox in datum['prediction'].boxes:
+            for tbox in datum['truth'].boxes:
+                if is_overlap(pbox, tbox, IOU_THRESHOLD):
+                    boxes_overlap.append(pbox)
+                    break
+        data[idx]['prediction'].boxes = boxes_overlap
+
+    print('>> Number of boxes predicted [Overlapped with ground truth]:',
+          sum([len(x['prediction'].boxes) for x in data]))
+
+    num_rel, num_det, num_hit = 0, 0, 0
+    for datum in data:
+        boxes_truth = datum['truth'].boxes
+        boxes_pred = datum['prediction'].boxes
+
+        num_rel += len(boxes_truth)
+        num_det += len(boxes_pred)
+        # Check rank 0 first.
+        num_hit += get_num_hit_rank(boxes_truth, boxes_pred, 0)
+
+    print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
+        r=num_rel, d=num_det, h=num_hit))
+    print('>> Precision = {p}, Recall = {r}'.format(
+        p=num_hit / num_det, r=num_hit / num_rel))
+
+#     imgs_pred = [x['prediction'] for x in data]
+#     imgs_truth = [x['truth'] for x in data]
+#     print(get_recall_precision(imgs_truth, imgs_pred))
