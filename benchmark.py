@@ -8,10 +8,10 @@ from box import crop_image_for_box
 from classifier import Classifier
 from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
-from precision import is_overlap, get_num_hit_rank
+from precision import get_hit_rank
 
-IMG_FOLDER = os.path.abspath('./data/detector/test_id/train/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test_id/train/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
 IOU_THRESHOLD = 0.5
 
 if __name__ == '__main__':
@@ -45,6 +45,9 @@ if __name__ == '__main__':
             data[idx]['truth'] = from_xml(f)
 
     for idx, datum in enumerate(data):
+        if idx % 10 == 0:
+            print('>> Begining to predict {}th item...'.format(idx))
+
         img_file = datum['files']['image']
         # TODO: combine detect + classify as a function?
         boxes = detector.detect(img_file)
@@ -58,37 +61,23 @@ if __name__ == '__main__':
     print('>> Number of boxes predicted:',
           sum([len(x['prediction'].boxes) for x in data]))
 
-    # Keep only the boxes in prediction if it overlaps some box in ground truth
+    print('-' * 40)
+
+    results = {}
     for idx, datum in enumerate(data):
-        boxes_truth = datum['truth'].boxes
-        boxes_pred = datum['prediction'].boxes
+        box_list = []
+        for box in datum['prediction'].boxes:
+            box_list.append(get_hit_rank(box, datum['truth'].boxes, 5))
+        results[datum['prediction'].fname] = box_list
 
-        boxes_overlap = []
-        for pbox in datum['prediction'].boxes:
-            for tbox in datum['truth'].boxes:
-                if is_overlap(pbox, tbox, IOU_THRESHOLD):
-                    boxes_overlap.append(pbox)
-                    break
-        data[idx]['prediction'].boxes = boxes_overlap
+    for k, v in results.items():
+        print('Key:', k)
+        print('>> Values:', v)
+        print('-' * 40)
 
-    print('>> Number of boxes predicted [Overlapped with ground truth]:',
-          sum([len(x['prediction'].boxes) for x in data]))
-
-    num_rel = sum([len(x['truth'].boxes) for x in data])
-    num_det, num_hit = 0, 0
-    # TODO: Add config for the max. of rank.
-    for rank in range(0, 5):
-        for datum in data:
-            boxes_truth = datum['truth'].boxes
-            boxes_pred = datum['prediction'].boxes
-
-            num_det += len(boxes_pred)
-            # Check rank 0 first.
-            num_hit += get_num_hit_rank(boxes_truth, boxes_pred, rank)
-
-        print('>> To Rank', rank)
-        print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
-            r=num_rel, d=num_det, h=num_hit))
-        print('>> Precision = {p}, Recall = {r}'.format(
-            p=num_hit / num_det, r=num_hit / num_rel))
-        print('---------------------------------------------------------')
+#         print('>> To Rank', rank)
+#         print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
+#             r=num_rel, d=num_det, h=num_hit))
+#         print('>> Precision = {p}, Recall = {r}'.format(
+#             p=num_hit / num_det, r=num_hit / num_rel))
+#         print('---------------------------------------------------------')
