@@ -3,6 +3,8 @@
 # TODO: Unify all the names:
 #       (Ground Truth, Prediction) v.s. (Relevant, Detection)
 
+IOU_THRESHOLD = 0.5
+
 
 def is_overlap(box_1, box_2, iou_th):
     """It checks whether the boxes input are overlapped to each other
@@ -13,7 +15,6 @@ def is_overlap(box_1, box_2, iou_th):
         box_1, box_2: The boxes input.
         iou_th: The threshold for the iou.
     """
-    print('>> IOU:', box_1.iou(box_2))
     return box_1.iou(box_2) > iou_th
 
 
@@ -65,6 +66,55 @@ def is_label_match_rank(box_truth, box_pred, rank):
         return False
 
     return box_truth.label() == box_pred.pred_labels()[rank]['label']
+
+
+def get_hit_rank(box_pred, boxes_truth, topn, iou_th=IOU_THRESHOLD):
+    """It returns the rank that the labels predicted matches the ground truth.
+    1) Go through all the boxes in img_truth, find the box
+       with highest iou as the candidate.
+    2) Check whether some label predicted matches the candidate's label.
+    3) It returns the rank if some label matches the ground truth.
+
+    Args:
+        box_pred: The box containing the labels predicted.
+        boxes_truth: All the possible ground truth boxes.
+        topn: Top n labels to considered.
+        iou_th: The threshould for iou.
+
+    Return:
+        (max_iou, is_detected, rank)
+        1) If all of the ground truth boxes has low iou with
+           the prediction box, it returns (max_iou, False, -1).
+        2) If some ground truth box has high iou with the one predicted,
+           but there is no label matched, it returns (max_iou, True, -1).
+        3) If some ground truth box has high iou with the one predicted,
+           and some label predicted matches the one in ground truth,
+           it returns (max_iou, True, rank), ranks = 0, 1, ..., topn-1.
+    """
+    # Go through all the boxes of ground truth.
+    # Find the one with max iou as the candidate.
+    max_iou = 0.0
+    for box in boxes_truth:
+        iou = box_pred.iou(box)
+        if iou >= max_iou:
+            candidate = box
+            max_iou = iou
+
+    # If the max iou does not surpass the threshold, it returns that
+    # the box is not detected.
+    if max_iou < iou_th:
+        return (max_iou, False, -1)
+
+    # Check the rank the labels predicted match the ground truth.
+    pred_labels = [x['label'] for x in box_pred.pred_labels()]
+    truth_label = candidate.label()
+    for i in range(0, min(topn, len(pred_labels))):
+        if pred_labels[i] == truth_label:
+            return (max_iou, True, i)
+
+    # If all the labels predicted are not matched to the ground truth,
+    # it returns rank '-1' to identify that there is no match.
+    return (max_iou, True, -1)
 
 
 def get_num_hit_rank(boxes_truth, boxes_pred, rank):
