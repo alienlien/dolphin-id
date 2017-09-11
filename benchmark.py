@@ -10,9 +10,47 @@ from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import get_hit_rank
 
-IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/test_id/train/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/test_id/train/annotation/')
 IOU_THRESHOLD = 0.5
+
+
+def is_fin(l1, l2):
+    return True
+
+
+def is_classifier_match_or_others(l1, l2):
+    """It checks whether labels matches for the dolphins in ku groups
+    that the classifier saw or not.
+
+    Args:
+        l1, l2: Labels 1 & 2.
+
+    Returns:
+        - If l1 and l2 are both known by the classifier, it returns
+          whether they are the same or not.
+        - If l1 and l2 are both not known by the classifier, it returns
+          true since they all belong to the group 'Others'.
+        - If they belongs to different groups, return false.
+    """
+    if is_classifier_seen(l1) and is_classifier_seen(l2):
+        return l1 == l2
+
+    # We return true no matter what the label is
+    # if it is not belongs to ku group.
+    if (not is_classifier_seen(l1)) and (not is_classifier_seen(l2)):
+        return True
+
+    # If the labels belongs to different groups, they are not matched.
+    return False
+
+
+def is_classifier_seen(l):
+    return l in [
+        'ku_000', 'ku_014', 'ku_015', 'ku_016', 'ku_017', 'ku_018', 'ku_020',
+        'ku_022', 'ku_114', 'ku_178'
+    ]
+
 
 if __name__ == '__main__':
     classifier = Classifier()
@@ -67,17 +105,39 @@ if __name__ == '__main__':
     for idx, datum in enumerate(data):
         box_list = []
         for box in datum['prediction'].boxes:
-            box_list.append(get_hit_rank(box, datum['truth'].boxes, 5))
+            print('>> Prediction Box:', box)
+            print('>> Ground Truth  :', datum['truth'].boxes)
+            #             result = get_hit_rank(
+            #                 box, datum['truth'].boxes, 5, is_match=is_fin)
+            result = get_hit_rank(
+                box,
+                datum['truth'].boxes,
+                5,
+                is_match=is_classifier_match_or_others)
+            print('>> Result:', result)
+            box_list.append(result)
         results[datum['prediction'].fname] = box_list
+        print('---------------------------------------')
 
     for k, v in results.items():
         print('Key:', k)
         print('>> Values:', v)
         print('-' * 40)
 
-#         print('>> To Rank', rank)
-#         print('>> Num rel = {r}, Num det = {d}, num hit = {h}.'.format(
-#             r=num_rel, d=num_det, h=num_hit))
-#         print('>> Precision = {p}, Recall = {r}'.format(
-#             p=num_hit / num_det, r=num_hit / num_rel))
-#         print('---------------------------------------------------------')
+    total_results = []
+    for x in results.values():
+        total_results += x
+
+    num_truth = sum([len(x['truth'].boxes) for x in data])
+    num_pred_box = sum([len(x['prediction'].boxes) for x in data])
+    num_pred = 0
+    num_hit = 0
+    for rank in range(0, 5):
+        num_pred += num_pred_box
+        print('>> To rank: ', rank)
+
+        num_hit += sum([1 for x in total_results if x[1] and (x[2] == rank)])
+        print('>> [Num] Truth: {}, pred: {}, hit: {}'.format(
+            num_truth, num_pred, num_hit))
+        print('>> Precision = {}, Recall = {}, Image Accuracy: {}'.format(
+            num_hit / num_pred, num_hit / num_truth, num_hit / num_pred_box))
