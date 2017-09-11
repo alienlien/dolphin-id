@@ -16,7 +16,7 @@ import shutil
 from parser import VIAParser, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
-SOURCE_FOLDER = './data/detector/src/HL20100803_01_gg_fix'
+SOURCE_FOLDER = './data/detector/src/HL20100823_04_gg_fix'
 TRAIN_FOLDER = './data/detector/test_id/train/'
 VALIDATION_FOLDER = './data/detector/test_id/validation/'
 VAL_RATIO = 0.2
