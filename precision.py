@@ -61,6 +61,10 @@ def get_recall_precision(imgs_truth, imgs_pred, is_hit):
     return num_hit / num_rel, num_hit / num_det
 
 
+def is_equal(l1, l2):
+    return l1 == l2
+
+
 def is_label_match_rank(box_truth, box_pred, rank):
     if rank >= len(box_pred.pred_labels()):
         return False
@@ -68,7 +72,11 @@ def is_label_match_rank(box_truth, box_pred, rank):
     return box_truth.label() == box_pred.pred_labels()[rank]['label']
 
 
-def get_hit_rank(box_pred, boxes_truth, topn, iou_th=IOU_THRESHOLD):
+def get_hit_rank(box_pred,
+                 boxes_truth,
+                 topn,
+                 iou_th=IOU_THRESHOLD,
+                 is_match=is_equal):
     """It returns the rank that the labels predicted matches the ground truth.
     1) Go through all the boxes in img_truth, find the box
        with highest iou as the candidate.
@@ -80,6 +88,7 @@ def get_hit_rank(box_pred, boxes_truth, topn, iou_th=IOU_THRESHOLD):
         boxes_truth: All the possible ground truth boxes.
         topn: Top n labels to considered.
         iou_th: The threshould for iou.
+        is_match: The func to define whether the boxes matches or not.
 
     Return:
         (max_iou, is_detected, rank)
@@ -109,7 +118,9 @@ def get_hit_rank(box_pred, boxes_truth, topn, iou_th=IOU_THRESHOLD):
     pred_labels = [x['label'] for x in box_pred.pred_labels()]
     truth_label = candidate.label()
     for i in range(0, min(topn, len(pred_labels))):
-        if pred_labels[i] == truth_label:
+        print('>> Label to check: Predict:{}, Truth:{}'.format(
+            pred_labels[i], truth_label))
+        if is_match(pred_labels[i], truth_label):
             return (max_iou, True, i)
 
     # If all the labels predicted are not matched to the ground truth,
