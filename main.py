@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     if tp.lower() == 'single':
         boxes = detector.detect(img_path)
-        box_imgs = [crop_image_for_box(box) for box in boxes]
+        box_imgs = [crop_image_for_box(img_path, box) for box in boxes]
         for idx, img in enumerate(box_imgs):
             boxes[idx].set_pred_labels(classifier.predict(img))
         img = ImageBoxes(fname=img_path, boxes=boxes)
