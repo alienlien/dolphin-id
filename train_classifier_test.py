@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from keras.models import Sequential
 from keras.layers import Dense
-import train as t
+import train_classifier as t
 
 
 def test_setup_to_transfer_learn_by_layer():
