@@ -94,6 +94,7 @@ def gen_image_folders(src_folder):
     out = []
     for root, dirs, files in os.walk(src_folder):
         img_files = [x for x in files if x.lower().endswith('.jpg')]
+        # TODO: Check the condition: no sub folders.
         if img_files and not dirs:
             out.append(root)
     return out
