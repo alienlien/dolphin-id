@@ -28,5 +28,13 @@ Training Dataset:
 Bounding box tool:
 - VGG VIA: http://www.robots.ox.ac.uk/~vgg/software/via/
 
+Classifier:
+
+Prepare data
+1) Merge the data according to the IDs.
+2) Split the data into training and validation folders.
+- $ data.py
+- $ split.py
+
 Train:
-- $ ./train.sh
+- $ ./train_classifier.sh
