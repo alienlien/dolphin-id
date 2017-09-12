@@ -163,56 +163,6 @@ def group_id_for(prefix, gid):
     return '{0}_{1:02d}'.format(prefix, int(gid))
 
 
-def gen_val(option, *args):
-    """It returns the value based on the option and arguments input.
-    """
-    option = option.lower()
-
-    if option == 'min':
-        return min(*args)
-    if option == 'max':
-        return max(*args)
-    return sum(args) / len(args)
-
-
-def gen_square(box, option='avg'):
-    """It returns a square box based on the box and the option input.
-    Specifically, the box returns would have the same center as the box input,
-    and the side length is determined according to the option input:
-    min: The minimum of the width and height of the box input.
-    avg: The average of the width and height of the box input.
-    max: The maximum of the width and height of the box input.
-
-    Args:
-        box: The box input.
-        option: The option for the side length of the square output.
-    """
-    side = gen_val(option, box.width(), box.height())
-    return Box(label=box.label(), center=box.center(), width=side, height=side)
-
-
-# def gen_yolo_box(img_width, img_height, box):
-#     """
-#     Args:
-#         img_width: The width of the image the box belongs to.
-#         img_height: The height of the image the box belongs to.
-#         box: The box input.
-#
-#     Returns:
-#         label, cx, cy, width, height
-#         Note that the center axis (cx, cy), width and height are normalized.
-#
-#     Ref:
-#         https://timebutt.github.io/static/how-to-train-yolov2-to-detect-custom-objects/
-#     """
-#     (cx, cy) = box.center()
-#     return box.label(), \
-#         cx / img_width, \
-#         cy / img_height, \
-#         box.width() / img_width, \
-#         box.height() / img_height
-
-
 def gen_xml_string(img_box):
     """It generates the corresbonding xml string for the image input
     It follows the XML format of VOC 2007 such that the classifier can
@@ -371,7 +321,6 @@ if __name__ == '__main__':
 
     for k, img in imgs.items():
         imgs[k].fname = os.path.join(src_folder, img.fname)
-        imgs[k].boxes = [gen_square(box, option='max') for box in img.boxes]
 
     img_files = [x.fname for x in imgs.values()]
     copy_files_to_folder(img_files, image_folder)
