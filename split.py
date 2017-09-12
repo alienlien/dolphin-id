@@ -5,9 +5,9 @@ import os.path
 import shutil
 import random
 
-DATA_FOLDER = './data/merge'
-TRAIN_FOLDER = './data/train'
-VALIDATION_FOLDER = './data/validation'
+DATA_FOLDER = './data/classifier/merge'
+TRAIN_FOLDER = './data/classifier/train'
+VALIDATION_FOLDER = './data/classifier/validation'
 MIN_VAL_NUM = 1
 VAL_RATIO = 0.2
 IS_SHUFFLE = True
