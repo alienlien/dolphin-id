@@ -7,23 +7,27 @@
 # TODO: Add scripts or sop to get data for fin detector.
 import os
 import os.path
-# from PIL import Image
+from docopt import docopt
 from box import crop_image_for_box
 from parser import VIAParser
 from prepare_detector import get_json, gen_image_folders, parse_source_folder
 
-SRC_FOLDER = './data/detector/src/HL20100702_01/'
-DST_FOLDER = './data/test_dst/'
+usage = """
+Usage:
+    photo_id.py [options]
 
+Options:
+    --src=DIR   The source directory containing images and via ID files. [default: './data/detector/src/']
+    --dst=DIR   The destination directory. [default: './data/classifier/merge/']
+"""
 if __name__ == '__main__':
     parser = VIAParser()
 
-    src_folder = os.path.abspath(SRC_FOLDER)
-    dst_folder = os.path.abspath(DST_FOLDER)
-    img_folders = gen_image_folders(src_folder)
+    args = docopt(usage, help=True)
+    src_folder = os.path.abspath(args['--src'])
+    dst_folder = os.path.abspath(args['--dst'])
 
-    for idx, folder in enumerate(img_folders):
-        print('Index: {0:4d}, Folder: {1}'.format(idx, folder))
+    img_folders = gen_image_folders(src_folder)
 
     imgs = {}
     for folder in img_folders:
@@ -55,8 +59,11 @@ if __name__ == '__main__':
             print('There is no corresponding file for json:', fname)
             continue
 
+        # Note that we remove the charactoers hard to process
+        # for unix-based system.
         box_fname_base = os.path.basename(fname).split('.')[0].replace(
             ' ', '_').replace('(', '').replace(')', '')
+
         for idx, box in enumerate(img.boxes):
             box_img = crop_image_for_box(fname, box)
             box_fname = '{base}_{idx}.jpg'.format(base=box_fname_base, idx=idx)
