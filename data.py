@@ -13,9 +13,10 @@ def get_dolphin_id(s):
     pattern = r'ku\ n(\d\d\d)|ku(\d\d\d)'
     result = re.search(pattern, s.lower())
     if not result:
-        id_for_set = os.path.basename(s)
+        # TODO: Integrate it with the via parser?
+        id_for_set = int(os.path.basename(s))
         data_set = os.path.basename(os.path.dirname(s))
-        return '{set}_{id}'.format(set=data_set, id=id_for_set)
+        return '{0}_{1:02d}'.format(data_set, id_for_set)
 
     if result.group(1):
         return kuroshio_id_for(result.group(1))
