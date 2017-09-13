@@ -17,8 +17,8 @@ Usage:
     photo_id.py [options]
 
 Options:
-    --src=DIR   The source directory containing images and via ID files. [default: './data/detector/src/']
-    --dst=DIR   The destination directory. [default: './data/classifier/merge/']
+    --src=DIR   The source directory containing images and via ID files. [default: ./data/detector/src/]
+    --dst=DIR   The destination directory. [default: ./data/classifier/merge/]
 """
 if __name__ == '__main__':
     parser = VIAParser()
