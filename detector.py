@@ -6,7 +6,7 @@ from darkflow.net.build import TFNet
 import parser as psr
 
 DEFAULT_CONFIG = {
-    'model': 'config/tiny-yolo-dolphin.cfg',
+    'model': 'config/yolo-dolphin.cfg',
     'load': -1,
     'threshold': 0.1,
     'labels': './labels_dolphin.txt',
