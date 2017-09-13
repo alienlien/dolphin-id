@@ -16,9 +16,9 @@ import shutil
 from parser import VIAParser, gen_xml_string, xml_fname_from_jpg
 from split import split_files
 
-SOURCE_FOLDER = './data/detector/src/HL20100823_04_gg_fix'
-TRAIN_FOLDER = './data/detector/test_id/train/'
-VALIDATION_FOLDER = './data/detector/test_id/validation/'
+SOURCE_FOLDER = './data/detector/src/'
+TRAIN_FOLDER = './data/detector/train/'
+VALIDATION_FOLDER = './data/detector/validation/'
 VAL_RATIO = 0.2
 IS_SHUFFLE = True
 
@@ -71,7 +71,8 @@ def is_id_box_file(json_fname):
     (i.e., group/ku id) or not.
     """
     # TODO: Determine the naming rules for (via) box files.
-    return json_fname.endswith('_ID.json') or json_fname.endswith('_ID2.json')
+    return json_fname.endswith('_ID.json') or json_fname.endswith(
+        '_ID2.json') or json_fname.endswith('_ID3.json')
 
 
 def parse_source_folder(parser, json_file, img_folder):
@@ -143,10 +144,20 @@ if __name__ == '__main__':
     for tp in ['train', 'validation']:
         print('>> Begin to copy image files for:', tp)
         for k in result[tp]:
+            if not os.path.exists(imgs[k].fname):
+                print('Image file does not exist:', imgs[k].fname)
+                continue
+
             shutil.copy(imgs[k].fname, folders[tp]['image'])
 
         print('>> Begin to generate xml files for:', tp)
         for k in result[tp]:
+            # If the image raw file (i.e., xxx.jpg) does not exist,
+            # one needs not to generate its corresponding xml file.
+            if not os.path.exists(imgs[k].fname):
+                print('Image file does not exist:', imgs[k].fname)
+                continue
+
             xml_fname = xml_fname_from_jpg(imgs[k].fname)
             dst = os.path.join(folders[tp]['anno'], xml_fname)
             with open(dst, 'w') as f:
