@@ -49,7 +49,10 @@ if __name__ == '__main__':
     # Copy the files to the corresponding folders.
     for did, files in out.items():
         folder = os.path.join(DATA_FOLDER_MERGE, did)
-        os.mkdir(folder)
+
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+
         for name in files:
             des = os.path.join(folder, os.path.basename(name))
             shutil.copyfile(name, des)
