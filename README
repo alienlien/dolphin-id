@@ -33,8 +33,19 @@ Classifier:
 Prepare data
 1) Merge the data according to the IDs.
 2) Split the data into training and validation folders.
-- $ data.py
-- $ split.py
+$ data.py
+$ split.py
 
 Train:
 - $ ./train_classifier.sh
+
+Detector:
+
+Prepare data
+$ python3 ./prepare_detector.py
+
+Make sure that the yolo weight is in the bin folder.
+- ./bin/yolo-voc.weights
+
+Train the detector:
+$ ./train_detector.sh
