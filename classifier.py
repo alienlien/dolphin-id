@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Ref: predict.py
+# from pprint import pprint
 import numpy as np
 from keras.preprocessing import image
 from keras.models import load_model
@@ -52,7 +53,10 @@ def predict(model, img, target_size):
 
 class Classifier(object):
     def __init__(self, config=DEFAULT_CONFIG):
-        self.config = config
+        # Update the keys from input argument config only.
+        # TODO: Might need to fix later?
+        self.config = DEFAULT_CONFIG
+        self.config.update(config)
         self.model = load_model(config['model'])
 
     def predict(self, img):
