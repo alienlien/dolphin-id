@@ -28,6 +28,11 @@ Training Dataset:
 Bounding box tool:
 - VGG VIA: http://www.robots.ox.ac.uk/~vgg/software/via/
 
+Dataset backup:
+- Classifier: classifier_src.tar.gz
+- Detector: detector_src.tar.gz.a{a..j}, and join file.
+$ cat detector_src.tar.gz.a{a..j} > detector_src.tar.gz
+
 Classifier:
 
 Prepare data
