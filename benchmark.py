@@ -6,13 +6,15 @@ import sys
 from box import ImageBoxes
 from box import crop_image_for_box
 from classifier import Classifier
+from config import ConfigStore
 from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import get_hit_rank
 
-IMG_FOLDER = os.path.abspath('./data/detector/test_id/train/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test_id/train/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
 IOU_THRESHOLD = 0.5
+DEFAULT_CFG_KEY = 'dolphin'
 
 
 def is_fin(l1, l2):
@@ -53,7 +55,8 @@ def is_classifier_seen(l):
 
 
 if __name__ == '__main__':
-    classifier = Classifier()
+    config = ConfigStore().get(DEFAULT_CFG_KEY)
+    classifier = Classifier(config)
     detector = FinDetector()
 
     img_files = [x for x in os.listdir(IMG_FOLDER)]
