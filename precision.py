@@ -4,6 +4,9 @@
 #       (Ground Truth, Prediction) v.s. (Relevant, Detection)
 
 IOU_THRESHOLD = 0.5
+MEAN_AVERAGE_PRECISION_GRIDS = [
+    0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
+]
 
 
 def is_overlap(box_1, box_2, iou_th):
@@ -144,3 +147,37 @@ def get_num_hit_rank(boxes_truth, boxes_pred, rank):
         return is_label_match_rank(box_truth, box_pred, rank)
 
     return get_num_hit(boxes_truth, boxes_pred, is_hit)
+
+
+def get_average_precision(pairs, grids=MEAN_AVERAGE_PRECISION_GRIDS):
+    """It returns the average precision for the list of
+    precision-to-recall pairs.
+    Ref: The PASCAL Visual Object Classes (VOC) Challenge.
+
+    Args:
+        Pairs: The list of precision-to-recall pairs
+        {
+            'precision': 0.35,
+            'recall': 0.50,
+        }, ...
+    """
+    return (1.0 / len(grids)) * sum(
+        [get_itpl_precision(x, pairs) for x in grids])
+
+
+def get_itpl_precision(recall, pairs):
+    """It returns the precision interpolated for the pairs input.
+
+    Args:
+        recall: The recall input.
+        pairs: The precision-recall pairs input.
+
+    Return:
+        The interpolated precision for the recall input.
+    """
+    larger_pairs = list(filter(lambda x: x['recall'] >= recall, pairs))
+
+    if len(larger_pairs) == 0:
+        return 0.0
+
+    return max([x['precision'] for x in larger_pairs])

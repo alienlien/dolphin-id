@@ -42,6 +42,22 @@ test_box_no_overlap = Box(
     width=test_width,
     height=test_height, )
 test_boxes_truth = [test_box_low_iou, test_box_high_iou, test_box_no_overlap]
+test_precision_recall_pairs = [{
+    'precision': 0.8,
+    'recall': 0.25,
+}, {
+    'precision': 0.6,
+    'recall': 0.4,
+}, {
+    'precision': 0.1,
+    'recall': 0.7,
+}, {
+    'precision': 0.4,
+    'recall': 0.95,
+}, {
+    'precision': 0.3,
+    'recall': 1.0,
+}]
 
 
 def test_get_hit_rank_not_detected():
@@ -95,3 +111,18 @@ def test_get_hit_rank_wrong_label():
     actual = p.get_hit_rank(test_box_pred, boxes_truth, topn=4, iou_th=0.9)
     expected = (1.0, True, -1)
     assert actual == expected
+
+
+def test_get_itpl_precision():
+    # Test the case if the recall input is too large.
+    assert p.get_itpl_precision(1.1, test_precision_recall_pairs) == 0.0
+
+    # Test the case that there is at least one item with larger recall
+    # than the one input.
+    assert p.get_itpl_precision(0.5, test_precision_recall_pairs) == 0.4
+
+
+def test_get_average_precision():
+    pairs = test_precision_recall_pairs
+    grids = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    assert abs(p.get_average_precision(pairs, grids) - 0.55) < 1e-6
