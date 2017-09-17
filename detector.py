@@ -6,7 +6,7 @@ from darkflow.net.build import TFNet
 import parser as psr
 
 DEFAULT_CONFIG = {
-    'model': 'config/yolo-dolphin.cfg',
+    'model': 'config/tiny-yolo-dolphin.cfg',
     'load': -1,
     'threshold': 0.1,
     'labels': './labels_dolphin.txt',
@@ -35,7 +35,9 @@ class FinDetector(object):
         Returns:
             The list of boxes in the image.
         """
+        print('File:', img_path)
         results = self.net.return_predict(cv2.imread(img_path))
+        print('Results:', results)
         return [psr.from_flow_result(x) for x in results]
 
     def detect_folder(self, folder):
