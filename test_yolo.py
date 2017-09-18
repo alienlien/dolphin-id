@@ -1,26 +1,39 @@
 #!/usr/bin/env python3
+# It is used to test the fin detector.
+# Note that when testing the detection of a whole folder, one needs to
+# add a sub-folder 'out' for the images with bounding box generated.
 import os.path
 from pprint import pprint
 import cv2
 from darkflow.net.build import TFNet
-
-IMAGE_FILE = os.path.abspath('./data/detector/src/HL20100730_02/HL20100730_02_Gg_047_IMG_8910.JPG')
-IMAGE_FOLDER = os.path.abspath('/Users/Alien/workspace/project/private/dolphin-id/data/detector/test/image/')
+from docopt import docopt
 
 options = {
     'model': 'config/tiny-yolo-dolphin.cfg',
     'load': -1,
     'threshold': 0.1,
     'labels': './labels_dolphin.txt',
-    'imgdir': IMAGE_FOLDER,
     'json': False,
 }
 
-tfnet = TFNet(options)
+usage = """
+Usage:
+    ./test_yolo.py [options]
 
-result = tfnet.predict()
-print('Result:', result)
+Options:
+    --img=FILE      The image file to test.
+    --imgdir=DIR    The image folder to test.
+"""
+if __name__ == '__main__':
+    args = docopt(usage, help=True)
 
-# imgcv = cv2.imread(IMAGE_FILE)
-# result = tfnet.return_predict(imgcv)
-# pprint(result)
+    if args['--img']:
+        tfnet = TFNet(options)
+        imgcv = cv2.imread(os.path.abspath(args['--img']))
+        result = tfnet.return_predict(imgcv)
+        pprint(result)
+
+    if args['--imgdir']:
+        options['imgdir'] = os.path.abspath(args['--imgdir'])
+        tfnet = TFNet(options)
+        tfnet.predict()
