@@ -158,10 +158,10 @@ if __name__ == '__main__':
             print(x)
         print('-' * 40)
 
+    mean_ap_data = {}
+
     # Collect information needed for recall and precision.
     num_truth_map = {}
-    num_pred_map = {}
-    num_hit_map = {}
     for idx, datum in enumerate(data):
         # Number of ground truth.
         for box in datum['truth'].boxes:
@@ -169,8 +169,16 @@ if __name__ == '__main__':
             if label not in num_truth_map:
                 num_truth_map[label] = 0
             num_truth_map[box.label()] += 1
+    mean_ap_data['num_truth'] = num_truth_map
 
-        # Number of prediction.
+    #     print('>> Num_truth_map:')
+    #     for key, val in num_truth_map.items():
+    #         print('Key: {}, Val: {'.format(key, val))
+    #         print('-' * 40)
+    #
+    # Number of prediction.
+    num_pred_map = {}
+    for idx, datum in enumerate(data):
         for box in datum['prediction'].boxes:
             # TODO: Replace '5' to parameter/config top n.
             for rank in range(0, 5):
@@ -178,14 +186,50 @@ if __name__ == '__main__':
                 if key not in num_pred_map:
                     num_pred_map[key] = 0
                 num_pred_map[key] += 1
+    mean_ap_data['num_pred'] = num_pred_map
 
-        # Number of hits.
+    #     print('>> Num_pred_map:')
+    #     for key, val in num_pred_map.items():
+    #         print('Key: {}, Val: {}'.format(key, val))
+    #         print('-' * 40)
+    #
+    # Number of hits.
+    num_hit_map = {}
+    for idx, datum in enumerate(data):
         for result in datum['results']:
             if result['rank'] >= 0:
                 key = (result['rank'], result['label'])
                 if key not in num_hit_map:
                     num_hit_map[key] = 0
                 num_hit_map[key] += 1
+    mean_ap_data['num_hit'] = num_hit_map
+
+    #     print('>> Num_hit_map:')
+    #     for key, val in num_hit_map.items():
+    #         print('Key: {}, Val: {}'.format(key, val))
+    #         print('-' * 40)
+    #
+    labels = mean_ap_data['num_truth'].keys()
+
+    print('-' * 80)
+    print('[ Precision-Recall by (Label, Rank)]')
+    for label in labels:
+        num_truth = mean_ap_data['num_truth'][label]
+        acc_num_hit = 0
+        acc_num_pred = 0
+        for rank in range(0, 5):
+            key = (rank, label)
+            acc_num_hit += mean_ap_data['num_hit'].get(key, 0)
+            acc_num_pred += mean_ap_data['num_pred'].get(key, 0)
+
+            precision = acc_num_hit / acc_num_pred if acc_num_pred > 0 else 0.0
+            recall = acc_num_hit / num_truth if num_truth > 0 else 0.0
+            print('>> Label: {}, Rank: {}'.format(label, rank))
+            print('>>   Acc Num Hit: {}, Acc Num Pred: {}, Num Truth: {}'.
+                  format(acc_num_hit, acc_num_pred, num_truth))
+            print('>>   Precision: {0:.3f}, Recall: {1:.3f}'.format(
+                precision, recall))
+        print('-' * 80)
 
     total_results = []
     for x in results.values():
