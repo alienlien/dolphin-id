@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # It benchmarks the performances for the system.
+# TODO: Add docopt for options (folders, is_fin/is_match, ... etc.)
 import os
 import os.path
 import sys
@@ -52,6 +53,36 @@ def is_classifier_seen(l):
         'ku_000', 'ku_014', 'ku_015', 'ku_016', 'ku_017', 'ku_018', 'ku_020',
         'ku_022', 'ku_114', 'ku_178'
     ]
+
+
+def is_match_ku_or_others(l1, l2):
+    """It checks whether labels are matched to each other or not
+    and the results depends on that they belong to group 'ku' or not.
+
+    Args:
+        l1, l2: The labels input.
+
+    Returns:
+        1) If both l1 and l2 belong to group 'ku', it checks whether
+           they are of the same label or not.
+        2) If both l1 and l2 do not belong to group 'ku', it returns True
+           anyway since they belong to 'others'.
+        3) If only one of the labels belongs to group 'ku', it returns False
+           anyway since they belong to two different groups: 'ku' and 'others'.
+    """
+    if is_ku(l1) and is_ku(l2):
+        return l1 == l2
+
+    if (not is_ku(l1)) and (not is_ku(l2)):
+        return True
+
+    return False
+
+
+def is_ku(label):
+    """It checks whether the label belongs to group 'ku' or not.
+    """
+    return label.startswith('ku_')
 
 
 if __name__ == '__main__':
@@ -113,10 +144,7 @@ if __name__ == '__main__':
             #             result = get_hit_rank(
             #                 box, datum['truth'].boxes, 5, is_match=is_fin)
             result = get_hit_rank(
-                box,
-                datum['truth'].boxes,
-                5,
-                is_match=is_classifier_match_or_others)
+                box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
             print('>> Result:', result)
             box_list.append(result)
         results[datum['prediction'].fname] = box_list
@@ -124,7 +152,9 @@ if __name__ == '__main__':
 
     for k, v in results.items():
         print('Key:', k)
-        print('>> Values:', v)
+        print('>> Values:')
+        for x in v:
+            print(x)
         print('-' * 40)
 
     total_results = []
@@ -139,7 +169,10 @@ if __name__ == '__main__':
         num_pred += num_pred_box
         print('>> To rank: ', rank)
 
-        num_hit += sum([1 for x in total_results if x[1] and (x[2] == rank)])
+        num_hit += sum([
+            1 for x in total_results
+            if x['is_box_detected'] and (x['rank'] == rank)
+        ])
         print('>> [Num] Truth: {}, pred: {}, hit: {}'.format(
             num_truth, num_pred, num_hit))
         print('>> Precision = {}, Recall = {}, Image Accuracy: {}'.format(
