@@ -147,6 +147,7 @@ if __name__ == '__main__':
                 box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
             print('>> Result:', result)
             box_list.append(result)
+        datum['results'] = box_list
         results[datum['prediction'].fname] = box_list
         print('---------------------------------------')
 
@@ -156,6 +157,35 @@ if __name__ == '__main__':
         for x in v:
             print(x)
         print('-' * 40)
+
+    # Collect information needed for recall and precision.
+    num_truth_map = {}
+    num_pred_map = {}
+    num_hit_map = {}
+    for idx, datum in enumerate(data):
+        # Number of ground truth.
+        for box in datum['truth'].boxes:
+            label = box.label()
+            if label not in num_truth_map:
+                num_truth_map[label] = 0
+            num_truth_map[box.label()] += 1
+
+        # Number of prediction.
+        for box in datum['prediction'].boxes:
+            # TODO: Replace '5' to parameter/config top n.
+            for rank in range(0, 5):
+                key = (rank, box.pred_labels()[rank]['label'])
+                if key not in num_pred_map:
+                    num_pred_map[key] = 0
+                num_pred_map[key] += 1
+
+        # Number of hits.
+        for result in datum['results']:
+            if result['rank'] >= 0:
+                key = (result['rank'], result['label'])
+                if key not in num_hit_map:
+                    num_hit_map[key] = 0
+                num_hit_map[key] += 1
 
     total_results = []
     for x in results.values():
