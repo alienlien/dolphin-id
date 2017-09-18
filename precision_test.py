@@ -67,7 +67,12 @@ def test_get_hit_rank_not_detected():
     actual = p.get_hit_rank(
         test_box_pred, test_boxes_truth, topn=10, iou_th=0.9)
     # The candidate is the test_box_high_iou with iou 1 / (4 * 2)
-    expected = (1 / (4 * 2), False, -1)
+    expected = {
+        'max_iou': 1 / (4 * 2),
+        'is_box_detected': False,
+        'rank': -1,
+        'label': '',
+    }
     assert actual == expected
 
 
@@ -79,21 +84,36 @@ def test_get_hit_rank_match_topn():
     # the matched label is of the rank not covered by topn.
     actual = p.get_hit_rank(
         test_box_pred, test_boxes_truth, topn=1, iou_th=0.1)
-    expected = (1 / (4 * 2), True, -1)
+    expected = {
+        'max_iou': 1 / (4 * 2),
+        'is_box_detected': True,
+        'rank': -1,
+        'label': '',
+    }
     assert actual == expected
 
     # Test the case that it overlaps some box and
     # it returns the rank of label predicted.
     actual = p.get_hit_rank(
         test_box_pred, test_boxes_truth, topn=3, iou_th=0.1)
-    expected = (1 / (4 * 2), True, 1)
+    expected = {
+        'max_iou': 1 / (4 * 2),
+        'is_box_detected': True,
+        'rank': 1,
+        'label': 'angela',
+    }
     assert actual == expected
 
     # Test the case that it overlaps some box and
     # the topn input is too large.
     actual = p.get_hit_rank(
         test_box_pred, test_boxes_truth, topn=100, iou_th=0.1)
-    expected = (1 / (4 * 2), True, 1)
+    expected = {
+        'max_iou': 1 / (4 * 2),
+        'is_box_detected': True,
+        'rank': 1,
+        'label': 'angela',
+    }
     assert actual == expected
 
 
@@ -109,7 +129,12 @@ def test_get_hit_rank_wrong_label():
             height=test_height)
     ]
     actual = p.get_hit_rank(test_box_pred, boxes_truth, topn=4, iou_th=0.9)
-    expected = (1.0, True, -1)
+    expected = {
+        'max_iou': 1.0,
+        'is_box_detected': True,
+        'rank': -1,
+        'label': '',
+    }
     assert actual == expected
 
 

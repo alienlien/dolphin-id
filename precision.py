@@ -94,14 +94,20 @@ def get_hit_rank(box_pred,
         is_match: The func to define whether the boxes matches or not.
 
     Return:
-        (max_iou, is_detected, rank)
+        {
+            'max_iou': The max iou with all the boxes in boxes_truth.
+            'is_box_detected': Whether these is a box is detected or not.
+            'rank': The rank of the label matched. -1: No match at any rank.
+            'label': The label matched. Empty string: No match at any rank.
+        }
         1) If all of the ground truth boxes has low iou with
-           the prediction box, it returns (max_iou, False, -1).
+           the prediction box, it returns (max_iou, False, -1, '').
         2) If some ground truth box has high iou with the one predicted,
-           but there is no label matched, it returns (max_iou, True, -1).
+           but there is no label matched, it returns (max_iou, True, -1, '').
         3) If some ground truth box has high iou with the one predicted,
            and some label predicted matches the one in ground truth,
-           it returns (max_iou, True, rank), ranks = 0, 1, ..., topn-1.
+           it returns (max_iou, True, rank, matched_label),
+           ranks = 0, 1, ..., topn-1.
     """
     # Go through all the boxes of ground truth.
     # Find the one with max iou as the candidate.
@@ -115,7 +121,12 @@ def get_hit_rank(box_pred,
     # If the max iou does not surpass the threshold, it returns that
     # the box is not detected.
     if max_iou < iou_th:
-        return (max_iou, False, -1)
+        return {
+            'max_iou': max_iou,
+            'is_box_detected': False,
+            'rank': -1,
+            'label': ''
+        }
 
     # Check the rank the labels predicted match the ground truth.
     pred_labels = [x['label'] for x in box_pred.pred_labels()]
@@ -124,11 +135,21 @@ def get_hit_rank(box_pred,
         print('>> Label to check: Predict:{}, Truth:{}'.format(
             pred_labels[i], truth_label))
         if is_match(pred_labels[i], truth_label):
-            return (max_iou, True, i)
+            return {
+                'max_iou': max_iou,
+                'is_box_detected': True,
+                'rank': i,
+                'label': pred_labels[i],
+            }
 
     # If all the labels predicted are not matched to the ground truth,
     # it returns rank '-1' to identify that there is no match.
-    return (max_iou, True, -1)
+    return {
+        'max_iou': max_iou,
+        'is_box_detected': True,
+        'rank': -1,
+        'label': '',
+    }
 
 
 def get_num_hit_rank(boxes_truth, boxes_pred, rank):
