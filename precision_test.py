@@ -42,6 +42,7 @@ test_box_no_overlap = Box(
     width=test_width,
     height=test_height, )
 test_boxes_truth = [test_box_low_iou, test_box_high_iou, test_box_no_overlap]
+# Note that we put two items with the same recall but different precision.
 test_precision_recall_pairs = [{
     'precision': 0.8,
     'recall': 0.25,
@@ -53,6 +54,9 @@ test_precision_recall_pairs = [{
     'recall': 0.7,
 }, {
     'precision': 0.4,
+    'recall': 0.95,
+}, {
+    'precision': 0.2,
     'recall': 0.95,
 }, {
     'precision': 0.3,
