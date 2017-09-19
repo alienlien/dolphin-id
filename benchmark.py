@@ -10,10 +10,10 @@ from classifier import Classifier
 from config import ConfigStore
 from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
-from precision import get_hit_rank
+from precision import get_hit_rank, get_average_precision
 
-IMG_FOLDER = os.path.abspath('./data/detector/test_id/validation/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/test_id/validation/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/validation/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/validation/annotation/')
 IOU_THRESHOLD = 0.5
 DEFAULT_CFG_KEY = 'dolphin'
 
@@ -143,8 +143,10 @@ if __name__ == '__main__':
             print('>> Ground Truth  :', datum['truth'].boxes)
             #             result = get_hit_rank(
             #                 box, datum['truth'].boxes, 5, is_match=is_fin)
+#             result = get_hit_rank(
+#                 box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
             result = get_hit_rank(
-                box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
+                box, datum['truth'].boxes, 5)
             print('>> Result:', result)
             box_list.append(result)
         datum['results'] = box_list
@@ -209,14 +211,21 @@ if __name__ == '__main__':
     #         print('Key: {}, Val: {}'.format(key, val))
     #         print('-' * 40)
     #
-    labels = mean_ap_data['num_truth'].keys()
+    labels = sorted(mean_ap_data['num_truth'].keys())
 
+    # TODO: Fix the problem that multiple boxes predicted points to
+    # the same box and thus recall would be higher than 1.0.
     print('-' * 80)
     print('[ Precision-Recall by (Label, Rank)]')
+    summary = {}
     for label in labels:
         num_truth = mean_ap_data['num_truth'][label]
         acc_num_hit = 0
         acc_num_pred = 0
+        summary[label] = {
+            'prec_recall': [],
+            'map': 0.0,
+        }
         for rank in range(0, 5):
             key = (rank, label)
             acc_num_hit += mean_ap_data['num_hit'].get(key, 0)
@@ -229,7 +238,23 @@ if __name__ == '__main__':
                   format(acc_num_hit, acc_num_pred, num_truth))
             print('>>   Precision: {0:.3f}, Recall: {1:.3f}'.format(
                 precision, recall))
+            summary[label]['prec_recall'].append({
+                'precision': precision,
+                'recall': recall,
+            })
         print('-' * 80)
+
+    for label in labels:
+        summary[label]['map'] = get_average_precision(summary[label]['prec_recall'])
+        print('>> Label: {0}, ap: {1:.3f}, prec_recall: {2}'.format(label, summary[label]['map'], summary[label]['prec_recall']))
+
+    mean_ap = 0.0
+    total_truth = sum(mean_ap_data['num_truth'].values())
+    for label in labels:
+        mean_ap += summary[label]['map'] * mean_ap_data['num_truth'][label]
+    mean_ap = mean_ap / total_truth
+    print('--------------------------')
+    print('>> MAP: ', mean_ap)
 
     total_results = []
     for x in results.values():
