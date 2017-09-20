@@ -12,8 +12,8 @@ from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import get_hit_rank, get_average_precision
 
-IMG_FOLDER = os.path.abspath('./data/detector/validation/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/validation/annotation/')
+IMG_FOLDER = os.path.abspath('./data/detector/train/image/')
+ANNO_FOLDER = os.path.abspath('./data/detector/train/annotation/')
 IOU_THRESHOLD = 0.5
 DEFAULT_CFG_KEY = 'dolphin'
 
@@ -173,11 +173,6 @@ if __name__ == '__main__':
             num_truth_map[box.label()] += 1
     mean_ap_data['num_truth'] = num_truth_map
 
-    #     print('>> Num_truth_map:')
-    #     for key, val in num_truth_map.items():
-    #         print('Key: {}, Val: {'.format(key, val))
-    #         print('-' * 40)
-    #
     # Number of prediction.
     num_pred_map = {}
     for idx, datum in enumerate(data):
@@ -190,11 +185,6 @@ if __name__ == '__main__':
                 num_pred_map[key] += 1
     mean_ap_data['num_pred'] = num_pred_map
 
-    #     print('>> Num_pred_map:')
-    #     for key, val in num_pred_map.items():
-    #         print('Key: {}, Val: {}'.format(key, val))
-    #         print('-' * 40)
-    #
     # Number of hits.
     num_hit_map = {}
     for idx, datum in enumerate(data):
@@ -206,11 +196,6 @@ if __name__ == '__main__':
                 num_hit_map[key] += 1
     mean_ap_data['num_hit'] = num_hit_map
 
-    #     print('>> Num_hit_map:')
-    #     for key, val in num_hit_map.items():
-    #         print('Key: {}, Val: {}'.format(key, val))
-    #         print('-' * 40)
-    #
     labels = sorted(mean_ap_data['num_truth'].keys())
 
     # TODO: Fix the problem that multiple boxes predicted points to
@@ -233,16 +218,10 @@ if __name__ == '__main__':
 
             precision = acc_num_hit / acc_num_pred if acc_num_pred > 0 else 0.0
             recall = acc_num_hit / num_truth if num_truth > 0 else 0.0
-            print('>> Label: {}, Rank: {}'.format(label, rank))
-            print('>>   Acc Num Hit: {}, Acc Num Pred: {}, Num Truth: {}'.
-                  format(acc_num_hit, acc_num_pred, num_truth))
-            print('>>   Precision: {0:.3f}, Recall: {1:.3f}'.format(
-                precision, recall))
             summary[label]['prec_recall'].append({
                 'precision': precision,
                 'recall': recall,
             })
-        print('-' * 80)
 
     for label in labels:
         summary[label]['map'] = get_average_precision(summary[label]['prec_recall'])
