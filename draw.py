@@ -14,7 +14,8 @@ Usage:
 
 Options:
     --img=FILE  The file to draw.
-    --anno=FILE The annotation file (.xml)
+    --anno=FILE The annotation file (.xml).
+    --out=FILE  Output file.
 """
 if __name__ == '__main__':
     args = docopt(usage, help=True)
@@ -33,4 +34,7 @@ if __name__ == '__main__':
                 [(ulx + shift, uly + shift), (lrx + shift, lry + shift)],
                 outline='yellow')
 
-    img.save('./output.png', 'PNG')
+    out_file = './output.png'
+    if args['--out']:
+        out_file = args['--out']
+    img.save(out_file, 'PNG')
