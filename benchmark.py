@@ -178,12 +178,33 @@ if __name__ == '__main__':
     num_hit_map = {}
     for idx, datum in enumerate(data):
         for result in datum['results']:
-            if result['rank'] >= 0:
+            if result['is_box_detected'] and result['rank'] >= 0:
                 key = (result['rank'], result['label'])
                 if key not in num_hit_map:
                     num_hit_map[key] = 0
                 num_hit_map[key] += 1
     mean_ap_data['num_hit'] = num_hit_map
+
+    # Collect the mis-labeled data for analysis.
+    # - Localization: Low IOU but correct label.
+    # - Other: Low IOU but wrong label.
+    # - Background: Too low IOU.
+    # TODO: Isolate it into a function?
+    error_data = {
+        'localization': 0,
+        'other': 0,
+        'background': 0,
+    }
+    for idx, datum in enumerate(data):
+        for result in datum['results']:
+            if not result['is_box_detected'] and result['max_iou'] >= 0.1 and result['rank'] >= 0:
+                error_data['localization'] += 1
+
+            if not result['is_box_detected'] and result['max_iou'] >= 0.1 and result['rank'] == -1:
+                error_data['other'] += 1
+
+            if not result['is_box_detected'] and result['max_iou'] < 0.1:
+                error_data['background'] += 1
 
     labels = sorted(mean_ap_data['num_truth'].keys())
 
@@ -244,5 +265,8 @@ if __name__ == '__main__':
         ])
         print('>> [Num] Truth: {}, pred: {}, hit: {}'.format(
             num_truth, num_pred, num_hit))
-        print('>> Precision = {}, Recall = {}, Image Accuracy: {}'.format(
-            num_hit / num_pred, num_hit / num_truth, num_hit / num_pred_box))
+        print(
+            '>> Precision = {0:.3f}, Recall = {1:.3f}, Image Accuracy: {2:.3f}'.
+            format(num_hit / num_pred, num_hit / num_truth, num_hit /
+                   num_pred_box))
+    print('>> Error Data:', error_data)
