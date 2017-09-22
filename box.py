@@ -137,6 +137,9 @@ class Box():
     def label(self):
         return self._label
 
+    def set_label(self, label):
+        self._label = label
+
     def upper_left(self):
         return (self.ulx, self.uly)
 
