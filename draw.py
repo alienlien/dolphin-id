@@ -4,9 +4,10 @@ from docopt import docopt
 from PIL import Image, ImageDraw, ImageFont
 from parser import from_xml
 
-DEFAULT_WIDTH = 20  # Width for the boxes.
 DEFAULT_FONT_PATH = '/Library/Fonts/Arial.ttf'
 DEFAULT_FONT_SIZE = 100
+DEFAULT_BOX_WIDTH = 20  # Width for the boxes.
+DEFAULT_BOX_COLOR = 'white'
 
 
 class BoxDrawer():
@@ -15,7 +16,12 @@ class BoxDrawer():
                  font_size=DEFAULT_FONT_SIZE):
         self.font = ImageFont.truetype(font=font_path, size=font_size)
 
-    def draw(self, img_in, img_out, boxes, width, color):
+    def draw(self,
+             img_in,
+             img_out,
+             boxes,
+             width=DEFAULT_BOX_WIDTH,
+             color=DEFAULT_BOX_COLOR):
         """It draws boxes on the image input.
 
         Args:
@@ -36,9 +42,9 @@ class BoxDrawer():
             label = box.label()
             _, height = self.font.getsize(label)
             draw.text(
-                (lrx, uly - height), box.label(), fill=color, font=self.font)
+                (ulx, uly - height), box.label(), fill=color, font=self.font)
 
-        img.save(img_out, 'PNG')
+        img.save(img_out)
 
 
 usage = """
@@ -57,4 +63,4 @@ if __name__ == '__main__':
     with open(args['--anno'], 'r') as f:
         boxes = from_xml(f).boxes
 
-    drawer.draw(args['--img'], args['--out'], boxes, DEFAULT_WIDTH, 'yellow')
+    drawer.draw(args['--img'], args['--out'], boxes, color='yellow')
