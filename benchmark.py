@@ -4,6 +4,7 @@
 import os
 import os.path
 import sys
+from docopt import docopt
 from box import ImageBoxes
 from box import crop_image_for_box
 from classifier import Classifier
@@ -12,8 +13,6 @@ from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
 from precision import get_hit_rank, get_average_precision
 
-IMG_FOLDER = os.path.abspath('./data/detector/train/image/')
-ANNO_FOLDER = os.path.abspath('./data/detector/train/annotation/')
 IOU_THRESHOLD = 0.5
 DEFAULT_CFG_KEY = 'dolphin'
 
@@ -85,13 +84,25 @@ def is_ku(label):
     return label.startswith('ku_')
 
 
+usage = """
+Usage:
+    benchmark.py [options]
+
+Options:
+    --imgdir=DIR    The directory contains images [default: ./data/detector/train/image/]
+    --annodir=DIR   The directory contains annotations [default: ./data/detector/train/annotation/]
+"""
 if __name__ == '__main__':
+    args = docopt(usage, help=True)
+    img_folder = os.path.abspath(args['--imgdir'])
+    anno_folder = os.path.abspath(args['--annodir'])
+
     config = ConfigStore().get(DEFAULT_CFG_KEY)
     classifier = Classifier(config)
     detector = FinDetector()
 
-    img_files = [x for x in os.listdir(IMG_FOLDER)]
-    anno_files = {x: True for x in os.listdir(ANNO_FOLDER)}
+    img_files = [x for x in os.listdir(img_folder)]
+    anno_files = {x: True for x in os.listdir(anno_folder)}
 
     if len(img_files) != len(anno_files):
         print('No match for image and annotation files.')
@@ -107,8 +118,8 @@ if __name__ == '__main__':
 
         data.append({
             'files': {
-                'image': os.path.join(IMG_FOLDER, img_file),
-                'annotation': os.path.join(ANNO_FOLDER, anno_file),
+                'image': os.path.join(img_folder, img_file),
+                'annotation': os.path.join(anno_folder, anno_file),
             },
         })
 
@@ -143,10 +154,9 @@ if __name__ == '__main__':
             print('>> Ground Truth  :', datum['truth'].boxes)
             #             result = get_hit_rank(
             #                 box, datum['truth'].boxes, 5, is_match=is_fin)
-#             result = get_hit_rank(
-#                 box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
-            result = get_hit_rank(
-                box, datum['truth'].boxes, 5)
+            #             result = get_hit_rank(
+            #                 box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
+            result = get_hit_rank(box, datum['truth'].boxes, 5)
             print('>> Result:', result)
             box_list.append(result)
         datum['results'] = box_list
@@ -224,8 +234,10 @@ if __name__ == '__main__':
             })
 
     for label in labels:
-        summary[label]['map'] = get_average_precision(summary[label]['prec_recall'])
-        print('>> Label: {0}, ap: {1:.3f}, prec_recall: {2}'.format(label, summary[label]['map'], summary[label]['prec_recall']))
+        summary[label]['map'] = get_average_precision(
+            summary[label]['prec_recall'])
+        print('>> Label: {0}, ap: {1:.3f}, prec_recall: {2}'.format(
+            label, summary[label]['map'], summary[label]['prec_recall']))
 
     mean_ap = 0.0
     total_truth = sum(mean_ap_data['num_truth'].values())
