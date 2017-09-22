@@ -114,30 +114,32 @@ def get_hit_rank(box_pred,
     max_iou = 0.0
     for box in boxes_truth:
         iou = box_pred.iou(box)
-        if iou >= max_iou:
+        if iou > max_iou:
             candidate = box
             max_iou = iou
 
-    # If the max iou does not surpass the threshold, it returns that
-    # the box is not detected.
-    if max_iou < iou_th:
+    # If there is no box overlapped, it returns the result directly.
+    if max_iou == 0.0:
         return {
-            'max_iou': max_iou,
+            'max_iou': 0.0,
             'is_box_detected': False,
             'rank': -1,
-            'label': ''
+            'label': '',
         }
 
     # Check the rank the labels predicted match the ground truth.
+    # Note that we check the labels whether the max_iou
+    # is greater than the threshold or not since we want to analyze
+    # the results for the localization error case (right label, low iou)
     pred_labels = [x['label'] for x in box_pred.pred_labels()]
     truth_label = candidate.label()
     for i in range(0, min(topn, len(pred_labels))):
-        print('>> Label to check: Predict:{}, Truth:{}'.format(
+        print('>> Label to check: Predict: {}, Truth: {}'.format(
             pred_labels[i], truth_label))
         if is_match(pred_labels[i], truth_label):
             return {
                 'max_iou': max_iou,
-                'is_box_detected': True,
+                'is_box_detected': (max_iou > iou_th),
                 'rank': i,
                 'label': pred_labels[i],
             }
@@ -146,7 +148,7 @@ def get_hit_rank(box_pred,
     # it returns rank '-1' to identify that there is no match.
     return {
         'max_iou': max_iou,
-        'is_box_detected': True,
+        'is_box_detected': (max_iou > iou_th),
         'rank': -1,
         'label': '',
     }

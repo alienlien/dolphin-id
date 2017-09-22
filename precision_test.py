@@ -64,8 +64,22 @@ test_precision_recall_pairs = [{
 }]
 
 
-def test_get_hit_rank_not_detected():
-    """It test the case that the iou of all the boxes are
+def test_get_hit_rank_no_overlap():
+    """It tests the case that no box overlaps the ground truth.
+    """
+    actual = p.get_hit_rank(
+        test_box_pred, [test_box_no_overlap], topn=10, iou_th=0.9)
+    expected = {
+        'max_iou': 0.0,
+        'is_box_detected': False,
+        'rank': -1,
+        'label': '',
+    }
+    assert actual == expected
+
+
+def test_get_hit_rank_iou_too_low():
+    """It tests the case that the iou of all the boxes are
     lower than the threshold.
     """
     actual = p.get_hit_rank(
@@ -74,8 +88,8 @@ def test_get_hit_rank_not_detected():
     expected = {
         'max_iou': 1 / (4 * 2),
         'is_box_detected': False,
-        'rank': -1,
-        'label': '',
+        'rank': 1,
+        'label': 'angela',
     }
     assert actual == expected
 
