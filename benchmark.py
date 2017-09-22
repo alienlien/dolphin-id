@@ -11,7 +11,7 @@ from classifier import Classifier
 from config import ConfigStore
 from detector import FinDetector
 from parser import xml_fname_from_jpg, from_xml
-from precision import get_hit_rank, get_average_precision
+from precision import get_hit_rank, get_average_precision, is_equal
 
 IOU_THRESHOLD = 0.5
 DEFAULT_CFG_KEY = 'dolphin'
@@ -19,39 +19,6 @@ DEFAULT_CFG_KEY = 'dolphin'
 
 def is_fin(l1, l2):
     return True
-
-
-def is_classifier_match_or_others(l1, l2):
-    """It checks whether labels matches for the dolphins in ku groups
-    that the classifier saw or not.
-
-    Args:
-        l1, l2: Labels 1 & 2.
-
-    Returns:
-        - If l1 and l2 are both known by the classifier, it returns
-          whether they are the same or not.
-        - If l1 and l2 are both not known by the classifier, it returns
-          true since they all belong to the group 'Others'.
-        - If they belongs to different groups, return false.
-    """
-    if is_classifier_seen(l1) and is_classifier_seen(l2):
-        return l1 == l2
-
-    # We return true no matter what the label is
-    # if it is not belongs to ku group.
-    if (not is_classifier_seen(l1)) and (not is_classifier_seen(l2)):
-        return True
-
-    # If the labels belongs to different groups, they are not matched.
-    return False
-
-
-def is_classifier_seen(l):
-    return l in [
-        'ku_000', 'ku_014', 'ku_015', 'ku_016', 'ku_017', 'ku_018', 'ku_020',
-        'ku_022', 'ku_114', 'ku_178'
-    ]
 
 
 def is_match_ku_or_others(l1, l2):
@@ -84,6 +51,19 @@ def is_ku(label):
     return label.startswith('ku_')
 
 
+def is_match_type(tp):
+    """It returns the is_match function for the type input.
+
+    Args:
+        tp: Type of the is_match function.
+    """
+    if tp == 'fin':
+        return is_fin
+    if tp == 'ku':
+        return is_match_ku_or_others
+    return is_equal
+
+
 usage = """
 Usage:
     benchmark.py [options]
@@ -91,6 +71,7 @@ Usage:
 Options:
     --imgdir=DIR    The directory contains images [default: ./data/detector/train/image/]
     --annodir=DIR   The directory contains annotations [default: ./data/detector/train/annotation/]
+    --match=TYPE    The type for match function other than equal (fin, ku) [default: equal]
 """
 if __name__ == '__main__':
     args = docopt(usage, help=True)
@@ -146,17 +127,15 @@ if __name__ == '__main__':
 
     print('-' * 40)
 
+    is_match = is_match_type(args['--match'])
     results = {}
     for idx, datum in enumerate(data):
         box_list = []
         for box in datum['prediction'].boxes:
             print('>> Prediction Box:', box)
             print('>> Ground Truth  :', datum['truth'].boxes)
-            #             result = get_hit_rank(
-            #                 box, datum['truth'].boxes, 5, is_match=is_fin)
-            #             result = get_hit_rank(
-            #                 box, datum['truth'].boxes, 5, is_match=is_match_ku_or_others)
-            result = get_hit_rank(box, datum['truth'].boxes, 5)
+            result = get_hit_rank(
+                box, datum['truth'].boxes, 5, is_match=is_match)
             print('>> Result:', result)
             box_list.append(result)
         datum['results'] = box_list
