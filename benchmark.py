@@ -10,6 +10,7 @@ from box import crop_image_for_box
 from classifier import Classifier
 from config import ConfigStore
 from detector import FinDetector
+from draw import BoxDrawer
 from parser import xml_fname_from_jpg, from_xml
 from precision import get_hit_rank, get_average_precision, is_equal
 
@@ -71,16 +72,19 @@ Usage:
 Options:
     --imgdir=DIR    The directory contains images [default: ./data/detector/train/image/]
     --annodir=DIR   The directory contains annotations [default: ./data/detector/train/annotation/]
+    --outdir=DIR    The directory containing output images.
     --match=TYPE    The type for match function other than equal (fin, ku) [default: equal]
 """
 if __name__ == '__main__':
     args = docopt(usage, help=True)
     img_folder = os.path.abspath(args['--imgdir'])
     anno_folder = os.path.abspath(args['--annodir'])
+    out_folder = os.path.abspath(args['--outdir'])
 
     config = ConfigStore().get(DEFAULT_CFG_KEY)
     classifier = Classifier(config)
     detector = FinDetector()
+    drawer = BoxDrawer()
 
     img_files = [x for x in os.listdir(img_folder)]
     anno_files = {x: True for x in os.listdir(anno_folder)}
@@ -101,6 +105,7 @@ if __name__ == '__main__':
             'files': {
                 'image': os.path.join(img_folder, img_file),
                 'annotation': os.path.join(anno_folder, anno_file),
+                'out': os.path.join(out_folder, img_file),
             },
         })
 
@@ -130,6 +135,7 @@ if __name__ == '__main__':
     is_match = is_match_type(args['--match'])
     results = {}
     for idx, datum in enumerate(data):
+        drawer.draw(datum['files']['image'], datum['files']['out'], datum['truth'].boxes, 20, 'yellow')
         box_list = []
         for box in datum['prediction'].boxes:
             print('>> Prediction Box:', box)
@@ -138,6 +144,15 @@ if __name__ == '__main__':
                 box, datum['truth'].boxes, 5, is_match=is_match)
             print('>> Result:', result)
             box_list.append(result)
+
+            # Draw the box
+            if result['rank'] >= 0:
+                label = result['label']
+            else:
+                label = box.pred_labels()[0]['label']
+            box.set_label(label)
+            drawer.draw(datum['files']['out'], datum['files']['out'], [box], 20, 'white')
+
         datum['results'] = box_list
         results[datum['prediction'].fname] = box_list
         print('---------------------------------------')
