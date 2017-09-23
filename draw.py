@@ -16,18 +16,14 @@ class BoxDrawer():
                  font_size=DEFAULT_FONT_SIZE):
         self.font = ImageFont.truetype(font=font_path, size=font_size)
 
-    def draw(self,
-             img_in,
-             img_out,
-             boxes,
-             width=DEFAULT_BOX_WIDTH,
-             color=DEFAULT_BOX_COLOR):
-        """It draws boxes on the image input.
-
-        Args:
-            img_in: The path of the image input.
+    def draw(self, img, boxes, width, color):
         """
-        img = Image.open(img_in)
+        Args:
+            img: PIL Image object.
+
+        Returns:
+            PIL Image object.
+        """
         draw = ImageDraw.Draw(img)
 
         for box in boxes:
@@ -44,6 +40,20 @@ class BoxDrawer():
             draw.text(
                 (ulx, uly - height), box.label(), fill=color, font=self.font)
 
+        return img
+
+    def draw_file(self,
+                  img_in,
+                  img_out,
+                  boxes,
+                  width=DEFAULT_BOX_WIDTH,
+                  color=DEFAULT_BOX_COLOR):
+        """It draws boxes on the image input.
+
+        Args:
+            img_in: The path of the image input.
+        """
+        img = self.draw(Image.open(img_in), boxes, width, color)
         img.save(img_out)
 
 
@@ -63,4 +73,4 @@ if __name__ == '__main__':
     with open(args['--anno'], 'r') as f:
         boxes = from_xml(f).boxes
 
-    drawer.draw(args['--img'], args['--out'], boxes, color='yellow')
+    drawer.draw_file(args['--img'], args['--out'], boxes, color='yellow')
