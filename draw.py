@@ -16,8 +16,14 @@ class BoxDrawer():
                  font_size=DEFAULT_FONT_SIZE):
         self.font = ImageFont.truetype(font=font_path, size=font_size)
 
-    def draw(self, img, boxes, width, color):
-        """
+    def draw(self,
+             img,
+             boxes,
+             width=DEFAULT_BOX_WIDTH,
+             color=DEFAULT_BOX_COLOR):
+        """It draws the boxes onto the image input and returns
+        the image object.
+
         Args:
             img: PIL Image object.
 
