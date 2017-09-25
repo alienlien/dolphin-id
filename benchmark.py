@@ -5,6 +5,7 @@ import os
 import os.path
 import sys
 from docopt import docopt
+from PIL import Image
 from box import ImageBoxes
 from box import crop_image_for_box
 from classifier import Classifier
@@ -16,6 +17,11 @@ from precision import get_hit_rank, get_average_precision, is_equal
 
 IOU_THRESHOLD = 0.5
 DEFAULT_CFG_KEY = 'dolphin'
+COLOR_CORRECT = 'green'
+COLOR_LOCALIZATION = 'yellow'
+COLOR_OTHER = 'orange'
+COLOR_BACKGROUND = 'red'
+COLOR_GROUND_TRUTH = 'white'
 
 
 def is_fin(l1, l2):
@@ -65,6 +71,26 @@ def is_match_type(tp):
     return is_equal
 
 
+def is_error_localization(result):
+    """It checks whether the result is a localization error or not.
+    Note that the types of the error comes from the yolo paper.
+    Ref: https://pjreddie.com/media/files/papers/yolo.pdf
+    """
+    return result['max_iou'] >= 0.1 and result['rank'] >= 0 and not result['is_box_detected']
+
+
+def is_error_other(result):
+    """It checks whether the result is an other erro or not.
+    """
+    return result['max_iou'] >= 0.1 and result['rank'] == -1
+
+
+def is_error_background(result):
+    """It checks whether the result is an background error or not.
+    """
+    return result['max_iou'] < 0.1
+
+
 usage = """
 Usage:
     benchmark.py [options]
@@ -79,7 +105,7 @@ if __name__ == '__main__':
     args = docopt(usage, help=True)
     img_folder = os.path.abspath(args['--imgdir'])
     anno_folder = os.path.abspath(args['--annodir'])
-    out_folder = os.path.abspath(args['--outdir'])
+    out_folder = os.path.abspath(args.get('--outdir', ''))
 
     config = ConfigStore().get(DEFAULT_CFG_KEY)
     classifier = Classifier(config)
@@ -135,7 +161,6 @@ if __name__ == '__main__':
     is_match = is_match_type(args['--match'])
     results = {}
     for idx, datum in enumerate(data):
-        drawer.draw(datum['files']['image'], datum['files']['out'], datum['truth'].boxes, 20, 'yellow')
         box_list = []
         for box in datum['prediction'].boxes:
             print('>> Prediction Box:', box)
@@ -144,14 +169,6 @@ if __name__ == '__main__':
                 box, datum['truth'].boxes, 5, is_match=is_match)
             print('>> Result:', result)
             box_list.append(result)
-
-            # Draw the box
-            if result['rank'] >= 0:
-                label = result['label']
-            else:
-                label = box.pred_labels()[0]['label']
-            box.set_label(label)
-            drawer.draw(datum['files']['out'], datum['files']['out'], [box], 20, 'white')
 
         datum['results'] = box_list
         results[datum['prediction'].fname] = box_list
@@ -212,13 +229,13 @@ if __name__ == '__main__':
     }
     for idx, datum in enumerate(data):
         for result in datum['results']:
-            if not result['is_box_detected'] and result['max_iou'] >= 0.1 and result['rank'] >= 0:
+            if is_error_localization(result):
                 error_data['localization'] += 1
 
-            if not result['is_box_detected'] and result['max_iou'] >= 0.1 and result['rank'] == -1:
+            if is_error_other(result):
                 error_data['other'] += 1
 
-            if not result['is_box_detected'] and result['max_iou'] < 0.1:
+            if is_error_background(result):
                 error_data['background'] += 1
 
     labels = sorted(mean_ap_data['num_truth'].keys())
@@ -285,3 +302,39 @@ if __name__ == '__main__':
             format(num_hit / num_pred, num_hit / num_truth, num_hit /
                    num_pred_box))
     print('>> Error Data:', error_data)
+
+    if out_folder:
+        for cntr, datum in enumerate(data):
+            if cntr % 10 == 0:
+                print('>> Drawing {0:>4d}th image...'.format(cntr))
+
+            img_in = datum['files']['image']
+            img_out = datum['files']['out']
+            img = Image.open(img_in).copy()
+
+            # Draw the prediction boxes, where the colors depending on
+            # the prediction results.
+            for idx, box in enumerate(datum['prediction'].boxes):
+                result = datum['results'][idx]
+
+                color = COLOR_CORRECT
+                if is_error_localization(result):
+                    color = COLOR_LOCALIZATION
+                if is_error_other(result):
+                    color = COLOR_OTHER
+                if is_error_background(result):
+                    color = COLOR_BACKGROUND
+
+                if result['rank'] >= 0:
+                    label = result['label']
+                else:
+                    label = box.pred_labels()[0]['label']
+
+                box.set_label(label)
+                img = drawer.draw(img, [box], color=color)
+
+            # Draw the ground truth boxes.
+            img = drawer.draw(
+                img, datum['truth'].boxes, color=COLOR_GROUND_TRUTH)
+
+            img.save(img_out)
