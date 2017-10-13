@@ -1,0 +1,2 @@
+Build the proto file for python:
+$ protoc --proto_path=./ --python_out=./ ./image.proto
