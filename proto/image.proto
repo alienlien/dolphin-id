@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+// It is the raw image object. It contains both the url to the image binary 
+// and meta data, such as the sighting and bounding boxes.
+message Image {
+  // The url of the binary file.
+  string url = 1;
+
+  // The original name of the raw image.
+  string filename = 2;
+
+  // The sighting of the photo: HL20100702_03
+  string sighting = 3;
+
+  // The location where the photo is shot.
+  Location location = 4;
+
+  // The person who take the shot.
+  string photographer = 5;
+
+  // The species of the animals in the image.
+  string species = 6;
+
+  // The timestamp the photo is shot.
+  int64 shot_ts = 7;
+
+  // It is the list of all the regions in the image.
+  repeated Region regions = 8;
+}
+
+// It is the geo location.
+message Location {
+  // Latitude of the geo location.
+  float latitude = 1;
+
+  // Longitude of the geo location.
+  float longitude = 2;
+}
+
+// It defines some region in the image.
+message Region {
+  
+  // The shape of the region.
+  enum Shape {
+    // The shape is not determined
+    UNKNOWN = 0;
+  
+    // Rectangle.
+    RECTANGLE = 1;
+  }
+
+  // It defines the shape of the region.
+  Shape shape = 1;
+
+  // The property of an rectangle.
+  RectangleProperty rectangle_property = 2;
+
+  // The dolphin id of the region.
+  string dolphin_id = 3;
+
+  // The group id of the region (with respect to the sighting).
+  int32 group_id = 4;
+
+  // It is the list of the prediction results (about dolphin ID and prob).
+  repeated Prediction predictions = 5;
+}
+
+// It contains the property for a rectangle region.
+message RectangleProperty {
+  // X-axis of the upper left corner.
+  float upper_left_x = 1;
+ 
+  // Y-axis of the upper left corner.
+  float upper_left_y = 2;
+
+  // Width of the rectangle.
+  float width = 3;
+
+  // Height of the rectangle.
+  float height = 4;
+}
+
+// It contains a prediction, which contains both dolphin ID and its probability.
+message Prediction {
+  // The dolphin ID predicted.
+  string dolphin_id = 1;
+
+  // The probability of the prediction.
+  float prob = 2;
+}
+
+// It is the image for fin.
+message FinImage {
+  // The url of the binary file.
+  string url = 1;
+
+  // The ID of the dolphin the fin image belongs to.
+  string dolphin_id = 2;
+
+  enum PhotoId {
+    // It indicates that it is not a photo ID.
+    PHOTO_ID_NONE = 0;
+  
+    // It indicates that it is the left side of the photo ID.
+    LEFT = 1;
+  
+    // It indicates that it is the right side of the photo ID.
+    RIGHT = 2;
+  }
+
+  // It is some side of the photo ID.
+  PhotoId photo_id = 3;
+
+  // It is the key/uuid of image that the fin image is cutted from.
+  string parent = 4;
+
+  // The list of dolphin id predicted (with the probability) for the fin image.
+  repeated Prediction predictions = 5;
+}
