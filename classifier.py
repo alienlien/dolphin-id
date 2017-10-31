@@ -77,5 +77,5 @@ def pred_label_for(label, prob):
     """
     return {
         'label': label,
-        'prob': prob,
+        'prob': float(prob),
     }

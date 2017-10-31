@@ -294,7 +294,7 @@ def from_flow_result(item):
         label=item['label'],
         upper_left=(item['topleft']['x'], item['topleft']['y']),
         lower_right=(item['bottomright']['x'], item['bottomright']['y']),
-        confidence=item['confidence'], )
+        confidence=float(item['confidence']), )
 
 
 if __name__ == '__main__':
