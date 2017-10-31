@@ -1,16 +1,20 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 
+
 [packages]
+
 tensorflow = "*"
-Keras = "*"
-Pillow = "*"
-h5py = "*"
+keras = "*"
+pillow = "*"
+"h5py" = "*"
 matplotlib = "*"
 requests = "*"
 docopt = "*"
-Cython = "*"
+cython = "*"
 opencv-python = "*"
 pytest = "*"
-Flask = "*"
+flask = "*"
+protobuf3-to-dict = "*"
