@@ -13,14 +13,17 @@ from PIL import Image
 from protobuf_to_dict import protobuf_to_dict
 from box import ImageBoxes, crop_image_for_box, Box
 from classifier import Classifier
+from config import ConfigStore
 from detector import FinDetector
 import proto.image_pb2 as pb
 
+# TODO: Centralize it into config.
+DEFAULT_CFG_KEY = 'dolphin'
 
 app = Flask(__name__)
 
 fin_detector = FinDetector()
-fin_classifier = Classifier()
+fin_classifier = Classifier(ConfigStore().get(DEFAULT_CFG_KEY))
 
 # class ProtoJsonEncoder(json.JSONEncoder):
 #
@@ -68,8 +71,9 @@ def pred_image():
         boxes[idx].set_pred_labels(fin_classifier.predict(img))
 
     return json.dumps([box.__dict__ for box in boxes])
-#     return json.dumps(boxes, cls=ProtoJsonEncoder)
 
+
+#     return json.dumps(boxes, cls=ProtoJsonEncoder)
 
 # @app.route('/prediction/image/fin/', methods=['POST'])
 # def upload_file():
@@ -119,8 +123,6 @@ def pred_image():
 #     print('>> Nested:', json.dumps(pred_1_dict))
 #     print('>> ToDict:', json.dumps(protobuf_to_dict(pred_1)))
 #     return json.dumps([protobuf_to_dict(pred_1), protobuf_to_dict(pred_2)])
-
-
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
