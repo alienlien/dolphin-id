@@ -11,6 +11,7 @@ from flask import Flask
 from google.protobuf import json_format
 from PIL import Image
 from protobuf_to_dict import protobuf_to_dict
+import adapter as adp
 from box import ImageBoxes, crop_image_for_box, Box
 from classifier import Classifier
 from config import ConfigStore
@@ -70,7 +71,9 @@ def pred_image():
     for idx, img in enumerate(box_imgs):
         boxes[idx].set_pred_labels(fin_classifier.predict(img))
 
-    return json.dumps([box.__dict__ for box in boxes])
+    # TODO: Resolve the issue about 'zero/default' value for protobuf.
+    return json.dumps(
+        [protobuf_to_dict(adp.to_pb_region(box)) for box in boxes])
 
 
 #     return json.dumps(boxes, cls=ProtoJsonEncoder)
