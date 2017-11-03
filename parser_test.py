@@ -257,28 +257,6 @@ def test_group_id_for():
     assert actual == 'aabbcc_07'
 
 
-def test_gen_val():
-    assert p.gen_val('MIN', 19.0, 11.0, 33.0) == 11.0
-    assert p.gen_val('Max', 19.0, 11.0, 33.0) == 33.0
-    assert p.gen_val('average', 19.0, 11.0, 33.0) == 21.0
-
-
-def test_gen_square():
-    box = Box(
-        label=test_label,
-        center=test_center,
-        width=test_width,
-        height=test_height, )
-
-    actual = p.gen_square(box, option='avg')
-    expected = Box(
-        label=test_label,
-        center=test_center,
-        width=52.5,
-        height=52.5, )
-    assert actual == expected
-
-
 def test_gen_xml_string():
     actual = p.gen_xml_string(test_image_boxes)
     assert actual == test_xml_string
