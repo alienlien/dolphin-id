@@ -4,19 +4,17 @@ import io
 import json
 import logging
 import os.path
-from tempfile import TemporaryFile, mkdtemp
+from tempfile import mkdtemp
 from flask import redirect
 from flask import request
 from flask import Flask
 from google.protobuf import json_format
 from PIL import Image
-from protobuf_to_dict import protobuf_to_dict
 import adapter as adp
-from box import ImageBoxes, crop_image_for_box, Box
+from box import crop_image_for_box
 from classifier import Classifier
 from config import ConfigStore
 from detector import FinDetector
-import proto.image_pb2 as pb
 
 # TODO: Centralize it into config.
 DEFAULT_CFG_KEY = 'dolphin'
@@ -71,9 +69,12 @@ def pred_image():
     for idx, img in enumerate(box_imgs):
         boxes[idx].set_pred_labels(fin_classifier.predict(img))
 
-    # TODO: Resolve the issue about 'zero/default' value for protobuf.
-    return json.dumps(
-        [protobuf_to_dict(adp.to_pb_region(box)) for box in boxes])
+    return json.dumps([
+        json.loads(
+            json_format.MessageToJson(
+                adp.to_pb_region(box), including_default_value_fields=True))
+        for box in boxes
+    ])
 
 
 #     return json.dumps(boxes, cls=ProtoJsonEncoder)
