@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TODO: Resolve not json serializable problem. Might replace it with proto.
 from PIL import Image
 
 
