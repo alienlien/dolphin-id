@@ -1,4 +1,14 @@
+Install python3.6 on CentOS:
+# Ref: https://www.softwarecollections.org/en/scls/rhscl/rh-python36/
+$ sudo yum install centos-release-scl
+$ sudo yum install scl-utils-build
+$ sudo yum install yum-utils
+$ sudo yum-config-manager --enable centos-sclo-rh-testing
+$ sudo yum install rh-python36
+$ scl enable rh-python36 bash
+
 Installation:
+$ git clone https://git.ai.csie.ndhu.edu.tw/alienlien/dolphin-id.git
 $ pip3 install pipenv
 $ pipenv install
 $ pipenv shell -c
