@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # Ref: https://docs.google.com/document/d/1PLFbp_0Rth4XpH3rHDPTQuE6hcUcJ9bNweMnH88FFwc/
-from http import HTTPStatus
 import json
 import requests
 from urllib.parse import urljoin
@@ -60,7 +59,7 @@ def test_pred_image():
         'file': open(TEST_IMAGE, 'rb'),
     }
     resp = requests.post(url, files=files)
-    assert resp.status_code == HTTPStatus.OK
+    assert resp.status_code == 200
 
     results = json.loads(resp.text)
     assert isinstance(results, list)
@@ -92,7 +91,7 @@ def test_pred_fin():
         'file': open(TEST_IMAGE_FIN, 'rb'),
     }
     resp = requests.post(url, files=files)
-    assert resp.status_code == HTTPStatus.OK
+    assert resp.status_code == 200
 
     result = json.loads(resp.text)
     assert isinstance(result, list)
