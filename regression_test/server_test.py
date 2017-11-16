@@ -13,8 +13,8 @@ import proto.image_pb2 as pb
 API_URL = 'http://localhost:5000'
 PRED_IMAGE_API = 'prediction/image/'
 PRED_FIN_API = '/prediction/image/fin/'
-TEST_IMAGE = '../data/detector/src/HL20100702_01/HL20100702_01_Gg_990702 (103).JPG'
-TEST_IMAGE_FIN = '../data/classifier/merge/ku_304/HL20110820_02_gg_021_IMG_4801_0.jpg'
+TEST_IMAGE = './image.jpg'
+TEST_IMAGE_FIN = './fin.jpg'
 
 
 def assert_region(item):
