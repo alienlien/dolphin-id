@@ -94,4 +94,4 @@ if __name__ == '__main__':
     # Note that we disable the debug mode for flask here to resolve the issue
     # when a keras model runs on a flask app.
     # Ref: https://github.com/fchollet/keras/issues/2397
-    app.run(debug=False)
+    app.run(host='0.0.0.0', debug=False)
