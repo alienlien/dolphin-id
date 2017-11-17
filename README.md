@@ -5,6 +5,57 @@ Install Logilab projects for pytest
 $ sudo apt install python-logilab-common
 ```
 
+## MongoDB (Ubuntu 16.04)
+Ref: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition
+Note that the installation depends on the version of ubuntu.
+Check the version of the glibc: >= glibc 2.23-0ubuntu5
+```
+$ ldd --version
+ldd (Ubuntu GLIBC 2.23-0ubuntu9) 2.23
+```
+Install MongoDB
+```
+$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+$ echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+$ sudo apt-get update
+$ sudo apt-get install -y mongodb-org
+```
+Start and Test MongoDB
+```
+$ sudo service mongod start
+```
+Test MongoDB: Check /var/log/mongodb/mongod.log
+```
+[initandlisten] waiting for connections on port <port>
+```
+
+## Parse Server
+Install Node.js and npm
+Ref: https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04
+```
+$ curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
+$ sudo bash nodesource_setup.sh
+$ sudo apt-get install build-essential nodejs
+```
+Install Parse Server
+Ref: http://docs.parseplatform.org/parse-server/guide/#getting-started
+```
+$ sh <(curl -fsSL https://raw.githubusercontent.com/parse-community/parse-server/master/bootstrap.sh)
+$ npm start
+```
+If there is a issue about mongodb, edit the parse config file manually:
+```
+  "databaseURI": "mongodb://127.0.0.1:27017/parse"
+```
+Test Parse Server
+```
+curl -X POST \
+-H "X-Parse-Application-Id: APPLICATION_ID" \
+-H "Content-Type: application/json" \
+-d '{"score":123,"playerName":"Sean Plott","cheatMode":false}' \
+http://localhost:1337/parse/classes/GameScore
+```
+
 ## Python environment
 ```
 $ git clone https://git.ai.csie.ndhu.edu.tw/alienlien/dolphin-id.git
