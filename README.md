@@ -1,53 +1,61 @@
 # Installation
 ## Prerequisite for Ubuntu (16.04)
 Install Logilab projects for pytest
+
 ```
 $ sudo apt install python-logilab-common
 ```
 
 ## MongoDB (Ubuntu 16.04)
-Ref: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition
+[Reference](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition)
 Note that the installation depends on the version of ubuntu.
-Check the version of the glibc: >= glibc 2.23-0ubuntu5
+
+- Check the version of the glibc: >= glibc 2.23-0ubuntu5
+
 ```
 $ ldd --version
 ldd (Ubuntu GLIBC 2.23-0ubuntu9) 2.23
 ```
-Install MongoDB
+- Install MongoDB
+
 ```
 $ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
 $ echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 $ sudo apt-get update
 $ sudo apt-get install -y mongodb-org
 ```
-Start and Test MongoDB
+- Start and Test MongoDB
+
 ```
 $ sudo service mongod start
 ```
-Test MongoDB: Check /var/log/mongodb/mongod.log
+- Test MongoDB: Check /var/log/mongodb/mongod.log
+
 ```
 [initandlisten] waiting for connections on port <port>
 ```
 
 ## Parse Server
-Install Node.js and npm
-Ref: https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04
+- Install Node.js and npm [Reference](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04)
+
 ```
 $ curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
 $ sudo bash nodesource_setup.sh
 $ sudo apt-get install build-essential nodejs
 ```
-Install Parse Server
-Ref: http://docs.parseplatform.org/parse-server/guide/#getting-started
+- Install Parse Server [Reference](http://docs.parseplatform.org/parse-server/guide/#getting-started)
+
 ```
 $ sh <(curl -fsSL https://raw.githubusercontent.com/parse-community/parse-server/master/bootstrap.sh)
 $ npm start
 ```
-If there is a issue about mongodb, edit the parse config file manually:
+- If there is a issue about mongodb, edit the parse config file manually:
+
 ```
   "databaseURI": "mongodb://127.0.0.1:27017/parse"
 ```
-Test Parse Server
+- Test Parse Server
+
 ```
 curl -X POST \
 -H "X-Parse-Application-Id: APPLICATION_ID" \
@@ -77,66 +85,86 @@ TODO: Find the place/procedure to get/set model.
 
 ## Test
 1. Start the server
+2. Run regression test
+
 ```
 $ python3 ./server.py
-```
-2. Run regression test
-```
 $ cd ./regression_test/
 $ ./run.sh
 ```
 
-Install gdrive tool
-- Download the binary from web page or use homebrew.
+## Others
+
+- Install gdrive tool
+	- Download the binary from web page or use homebrew. [Reference](https://github.com/prasmussen/gdrive)
+
+```
 $ brew install gdrive
-- Ref: https://github.com/prasmussen/gdrive
+```
 
-Use the gdrive tool for the first time
-1) Authentication needed.
-2) Go to the following url as shown in the command line.
-3) Enter verification code as shown in the browser.
+- Use the gdrive tool for the first time
+	1. Authentication needed.
+	2. Go to the following url as shown in the command line.
+	3. Enter verification code as shown in the browser.
 
-Get weight
-- https://drive.google.com/drive/folders/0B1tW_VtY7onidEwyQ2FtQVplWEU
-- tiny-yolo-voc.weights
+- Get weight
+	- https://drive.google.com/drive/folders/0B1tW_VtY7onidEwyQ2FtQVplWEU
+	- tiny-yolo-voc.weights
 
-Training Dataset:
-- Dolphin images and bounding boxes.
-- https://drive.google.com/drive/folders/0B3a2oBXXOsEqbXlodDZuUV9RVVk
+- Training Dataset:
+	- Dolphin images and bounding boxes.
+	- https://drive.google.com/drive/folders/0B3a2oBXXOsEqbXlodDZuUV9RVVk
 
-Bounding box tool:
-- VGG VIA: http://www.robots.ox.ac.uk/~vgg/software/via/
+- Bounding box tool:
+	- VGG VIA: http://www.robots.ox.ac.uk/~vgg/software/via/
 
-Dataset backup:
-- Classifier: classifier_src.tar.gz
-- Detector: detector_src.tar.gz.a{a..j}, and join file.
+- Dataset backup:
+	- Classifier: classifier_src.tar.gz
+	- Detector: detector_src.tar.gz.a{a..j}, and join file.
+
+```
 $ cat detector_src.tar.gz.a{a..j} > detector_src.tar.gz
+```
 
-Classifier:
+## Classifier:
 
-Prepare data
-1) Merge the data according to the IDs.
-2) Split the data into training and validation folders.
-$ data.py
-$ split.py
+- Prepare data
+	1. Merge the data according to the IDs.
+	2. Split the data into training and validation folders.
 
-Train:
-- $ ./train_classifier.sh
+```
+$ python3 data.py
+$ python3 split.py
+```
 
-Detector:
+- Train the model:
 
-Prepare data
+```
+$ ./train_classifier.sh
+```
+
+## Detector:
+
+- Prepare data
+
+```
 $ python3 ./prepare_detector.py
+```
 
-Make sure that the yolo weight is in the bin folder.
-- ./bin/yolo-voc.weights
+- Make sure that the yolo weight is in the bin folder: 
 
-Train the detector:
+```
+./bin/yolo-voc.weights
+```
+- Train the detector:
+
+```
 $ ./train_detector.sh
+```
 
 # Prepare Model
-- Classifier: ./model/dolphin_classifier.h5
-- Detector: ./ckpt
+- Classifier: `./model/dolphin_classifier.h5`
+- Detector: `./ckpt`
 
 ## Preparation for CentOS (Not Complete)
 Install python3.6 on CentOS:
