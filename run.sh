@@ -1,16 +1,18 @@
 #!/bin/bash
 # Config for mongo db.
 # Usage: run.sh [mongo|parse|all]
+
+# Config for mongo db.
 MONGODB_PORT=27017
-MONGODB_DBPATH=/tmp/mongo
-MONGODB_LOGPATH=/tmp/logs/mongo/server1.log
+MONGODB_DBPATH=$HOME/db/mongo
+MONGODB_LOGPATH=$HOME/logs/mongo/server1.log
 
 # Config for parse server.
 PARSE_APPLICATION_ID=1
 PARSE_MASTER_KEY=abc123
 PARSE_PORT=1337
 PARSE_DATABASE_URI=mongodb://localhost:$MONGODB_PORT/parse
-PARSE_LOGS_FOLDER=/tmp/logs/parse
+PARSE_LOGS_FOLDER=$HOME/logs/parse
 
 # Runs mongo db.
 if [ "$1" == "all" ] || [ "$1" == "mongo" ]; then
