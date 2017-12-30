@@ -6,6 +6,20 @@ Install Logilab projects for pytest
 $ sudo apt install python-logilab-common
 ```
 
+## Python environment
+```
+$ git clone https://git.ai.csie.ndhu.edu.tw/alienlien/dolphin-id.git
+$ pip3 install pipenv
+$ pipenv install
+$ pipenv shell -c
+```
+
+## Install darkflow
+```
+$ git clone https://github.com/thtrieu/darkflow
+$ pip install -e .
+```
+
 ## MongoDB (Ubuntu 16.04)
 [Reference](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition)
 Note that the installation depends on the version of ubuntu.
@@ -63,24 +77,21 @@ curl -X POST \
 ```
 
 ## Prepare the environment (MongoDB + Parse)
+- Make folders for db and logs.
+
+```
+$ mkdir ~/db/mongo
+$ mkdir ~/logs
+$ mkdir ~/logs/mongo
+$ mkdir ~/logs/parse
+```
+
+- Edit the running script with the folders created.
+- Run the script.
 ```
 $ ./run.sh all
 ```
 - Note that one can start any one (e.g., mongodb or parse) by specifying the type: `mongo` or `parse`.
-
-## Python environment
-```
-$ git clone https://git.ai.csie.ndhu.edu.tw/alienlien/dolphin-id.git
-$ pip3 install pipenv
-$ pipenv install
-$ pipenv shell -c
-```
-
-## Install darkflow
-```
-$ git clone https://github.com/thtrieu/darkflow
-$ pip install -e .
-```
 
 ## Get the model
 TODO: Find the place/procedure to get/set model.
