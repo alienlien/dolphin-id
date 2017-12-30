@@ -15,6 +15,7 @@ PARSE_LOGS_FOLDER=/tmp/logs/parse
 # Runs mongo db.
 if [ "$1" == "all" ] || [ "$1" == "mongo" ]; then
     mongod \
+        --verbose \
         --logpath $MONGODB_LOGPATH \
         --port $MONGODB_PORT \
         --dbpath $MONGODB_DBPATH &
@@ -26,6 +27,7 @@ fi
 # Runs parse server.
 if [ "$1" == "all" ] || [ "$1" == "parse" ]; then
     parse-server \
+        --verbose \
         --jsonLogs \
         --logsFolder $PARSE_LOGS_FOLDER \
         --appId $PARSE_APPLICATION_ID \
