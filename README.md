@@ -43,26 +43,30 @@ $ curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
 $ sudo bash nodesource_setup.sh
 $ sudo apt-get install build-essential nodejs
 ```
-- Install Parse Server [Reference](http://docs.parseplatform.org/parse-server/guide/#getting-started)
+- Install Parse Server [Reference](https://www.npmjs.com/package/parse-server)
+    - Use npm install directly rather than the complicated procedure in official parse document.
+    - One must specified the database URI if the mongo db is not installed in default setting.
 
 ```
-$ sh <(curl -fsSL https://raw.githubusercontent.com/parse-community/parse-server/master/bootstrap.sh)
-$ npm start
+$ npm install -g parse-server
+$ parse-server --databaseURI mongodb://localhost:27017/parse
 ```
-- If there is a issue about mongodb, edit the parse config file manually:
 
-```
-  "databaseURI": "mongodb://127.0.0.1:27017/parse"
-```
 - Test Parse Server
 
 ```
 curl -X POST \
--H "X-Parse-Application-Id: APPLICATION_ID" \
--H "Content-Type: application/json" \
--d '{"score":123,"playerName":"Sean Plott","cheatMode":false}' \
-http://localhost:1337/parse/classes/GameScore
+    -H "X-Parse-Application-Id: 1" \
+    -H "Content-Type: application/json" \
+    -d '{"score":123,"playerName":"Sean Plott","cheatMode":false}' \
+    http://localhost:1337/parse/classes/GameScore
 ```
+
+## Prepare the environment (MongoDB + Parse)
+```
+$ ./run.sh all
+```
+- Note that one can start any one (e.g., mongodb or parse) by specifying the type: `mongo` or `parse`.
 
 ## Python environment
 ```
