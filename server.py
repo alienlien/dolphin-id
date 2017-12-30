@@ -5,11 +5,14 @@ import json
 import logging
 import os.path
 from tempfile import mkdtemp
+
+from docopt import docopt
 from flask import redirect
 from flask import request
 from flask import Flask
 from google.protobuf import json_format
 from PIL import Image
+
 import adapter as adp
 from box import crop_image_for_box
 from classifier import Classifier
@@ -90,8 +93,19 @@ def pred_fin():
     ])
 
 
+usage = """
+Usage:
+    server.py [options]
+
+Options:
+    --host=HOST The host of the server [default: 0.0.0.0].
+    --port=PORT The port of the server [default: 5000].
+"""
 if __name__ == '__main__':
     # Note that we disable the debug mode for flask here to resolve the issue
     # when a keras model runs on a flask app.
     # Ref: https://github.com/fchollet/keras/issues/2397
-    app.run(host='0.0.0.0', debug=False)
+    args = docopt(usage, help=True)
+    host = args['--host']
+    port = args['--port']
+    app.run(host=host, port=port, debug=False)
